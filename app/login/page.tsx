@@ -45,8 +45,8 @@ export default function LoginPage() {
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-block w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mb-4">
-            <span className="text-white font-bold text-3xl">I</span>
+          <div className="inline-block w-30 h-30 rounded-2xl flex items-center justify-center mb-4 overflow-hidden">
+            <img src="/Instantlly Logo.jpg" alt="Instantlly Logo" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">InstantllyAds</h1>
           <p className="text-gray-600">Advertisement Management Dashboard</p>
