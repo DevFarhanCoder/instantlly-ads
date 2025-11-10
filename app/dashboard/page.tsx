@@ -36,8 +36,42 @@ export default function Dashboard() {
   const { data: adsData, isLoading, error, isError } = useQuery({
     queryKey: ['ads'],
     queryFn: async () => {
-      const response = await api.get('/ads');
-      return response.data.data;
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log('🌐 [FRONTEND] Starting API request to fetch ads');
+      console.log('🕐 Time:', new Date().toISOString());
+      console.log('🔗 URL:', api.defaults.baseURL + '/ads');
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      
+      const startTime = Date.now();
+      
+      try {
+        console.log('📤 Sending GET request to backend...');
+        const response = await api.get('/ads');
+        const requestTime = Date.now() - startTime;
+        
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('✅ [FRONTEND] Response received!');
+        console.log('⏱️  Request time:', requestTime, 'ms');
+        console.log('📊 Status:', response.status);
+        console.log('📦 Data received:', response.data?.data?.length || 0, 'ads');
+        console.log('🐛 Debug info:', response.data?.debug);
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        
+        return response.data.data;
+      } catch (err: any) {
+        const requestTime = Date.now() - startTime;
+        
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.error('❌ [FRONTEND] Request failed!');
+        console.error('⏱️  Time elapsed:', requestTime, 'ms');
+        console.error('🔴 Error type:', err.code || err.name);
+        console.error('💬 Error message:', err.message);
+        console.error('📊 Response status:', err.response?.status);
+        console.error('📦 Response data:', err.response?.data);
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        
+        throw err;
+      }
     },
     retry: 2, // Retry failed requests twice
     retryDelay: 1000, // Wait 1s between retries
@@ -171,21 +205,38 @@ export default function Dashboard() {
               </div>
             ) : isError ? (
               <div className="p-8 text-center">
-                <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-2xl mx-auto">
                   <h3 className="text-lg font-semibold text-red-900 mb-2">Failed to Load Ads</h3>
                   <p className="text-sm text-red-700 mb-4">
-                    {error instanceof Error ? error.message : 'Database timeout - MongoDB connection is too slow'}
+                    {error instanceof Error ? error.message : 'Unknown error occurred'}
                   </p>
+                  
+                  {/* Debug Information */}
+                  <div className="bg-red-100 border border-red-300 rounded p-4 mb-4 text-left">
+                    <p className="text-xs font-semibold text-red-900 mb-2">🐛 Debug Information:</p>
+                    <div className="space-y-1 text-xs text-red-800 font-mono">
+                      <p>🌐 Frontend: Connected to browser ✅</p>
+                      <p>🔗 API URL: {api.defaults.baseURL}/ads</p>
+                      <p>⏰ Time: {new Date().toLocaleTimeString()}</p>
+                      <p>📱 Check browser console for detailed logs</p>
+                    </div>
+                  </div>
+                  
                   <div className="space-y-2 text-left text-xs text-red-600 bg-red-100 p-3 rounded mb-4">
                     <p><strong>Possible reasons:</strong></p>
                     <ul className="list-disc list-inside space-y-1">
-                      <li>Render free tier service is sleeping (takes 50-90 seconds)</li>
-                      <li>MongoDB Atlas connection timeout</li>
-                      <li>Network connectivity issues</li>
+                      <li>🟡 Render free tier sleeping (50-90 seconds wake time)</li>
+                      <li>🔴 MongoDB Atlas connection timeout</li>
+                      <li>🔴 Network connectivity issues</li>
+                      <li>🔴 Render.com IP blocked by MongoDB firewall</li>
                     </ul>
+                    <p className="mt-2"><strong>💡 Check Render logs for backend errors</strong></p>
                   </div>
                   <button
-                    onClick={() => queryClient.invalidateQueries({ queryKey: ['ads'] })}
+                    onClick={() => {
+                      console.log('🔄 [FRONTEND] User clicked retry button');
+                      queryClient.invalidateQueries({ queryKey: ['ads'] });
+                    }}
                     className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition"
                   >
                     Retry
