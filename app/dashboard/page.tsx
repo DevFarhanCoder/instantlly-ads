@@ -33,12 +33,15 @@ export default function Dashboard() {
   };
 
   // Fetch all ads
-  const { data: adsData, isLoading } = useQuery({
+  const { data: adsData, isLoading, error, isError } = useQuery({
     queryKey: ['ads'],
     queryFn: async () => {
       const response = await api.get('/ads');
       return response.data.data;
     },
+    retry: 2, // Retry failed requests twice
+    retryDelay: 1000, // Wait 1s between retries
+    staleTime: 30000, // Consider data fresh for 30s
   });
 
   // Fetch analytics
@@ -161,7 +164,34 @@ export default function Dashboard() {
           </div>
           <div className="overflow-x-auto">
             {isLoading ? (
-              <div className="p-8 text-center text-gray-500">Loading ads...</div>
+              <div className="p-8 text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <p className="text-gray-900 font-medium">Loading ads...</p>
+                <p className="text-sm text-gray-500 mt-2">This may take up to 90 seconds if the server was sleeping...</p>
+              </div>
+            ) : isError ? (
+              <div className="p-8 text-center">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
+                  <h3 className="text-lg font-semibold text-red-900 mb-2">Failed to Load Ads</h3>
+                  <p className="text-sm text-red-700 mb-4">
+                    {error instanceof Error ? error.message : 'Database timeout - MongoDB connection is too slow'}
+                  </p>
+                  <div className="space-y-2 text-left text-xs text-red-600 bg-red-100 p-3 rounded mb-4">
+                    <p><strong>Possible reasons:</strong></p>
+                    <ul className="list-disc list-inside space-y-1">
+                      <li>Render free tier service is sleeping (takes 50-90 seconds)</li>
+                      <li>MongoDB Atlas connection timeout</li>
+                      <li>Network connectivity issues</li>
+                    </ul>
+                  </div>
+                  <button
+                    onClick={() => queryClient.invalidateQueries({ queryKey: ['ads'] })}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition"
+                  >
+                    Retry
+                  </button>
+                </div>
+              </div>
             ) : adsData && adsData.length > 0 ? (
               <table className="w-full min-w-full">
                 <thead className="bg-gray-50">
