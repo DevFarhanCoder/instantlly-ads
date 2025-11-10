@@ -106,9 +106,24 @@ export default function Dashboard() {
     },
   });
 
-  const handleEdit = (ad: Ad) => {
-    setEditingAd(ad);
-    setShowModal(true);
+  const handleEdit = async (ad: Ad) => {
+    console.log('📝 [FRONTEND] Fetching complete ad data for editing:', ad._id);
+    
+    try {
+      // Fetch complete ad data including images
+      const response = await api.get(`/ads/${ad._id}`);
+      const completeAd = response.data.data;
+      
+      console.log('✅ [FRONTEND] Complete ad data fetched');
+      console.log('   Has bottomImage:', !!completeAd.bottomImage);
+      console.log('   Has fullscreenImage:', !!completeAd.fullscreenImage);
+      
+      setEditingAd(completeAd);
+      setShowModal(true);
+    } catch (error) {
+      console.error('❌ [FRONTEND] Failed to fetch ad details:', error);
+      alert('Failed to load ad details. Please try again.');
+    }
   };
 
   const handleDelete = async (id: string) => {
