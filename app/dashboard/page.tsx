@@ -10,8 +10,10 @@ import { format } from 'date-fns';
 interface Ad {
   _id: string;
   title: string;
-  bottomImage: string;
-  fullscreenImage: string;
+  bottomImage?: string; // Now optional (excluded from list query)
+  fullscreenImage?: string; // Now optional (excluded from list query)
+  bottomImageGridFS?: string; // GridFS reference
+  fullscreenImageGridFS?: string; // GridFS reference
   phoneNumber: string;
   startDate: string;
   endDate: string;
@@ -20,6 +22,12 @@ interface Ad {
   clicks: number;
   createdAt: string;
 }
+
+// Helper to construct image URL
+const getImageUrl = (adId: string, type: 'bottom' | 'fullscreen') => {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://instantlly-cards-backend-6ki0.onrender.com';
+  return `${baseUrl}/api/ads/image/${adId}/${type}`;
+};
 
 export default function Dashboard() {
   const [showModal, setShowModal] = useState(false);
@@ -267,16 +275,16 @@ export default function Dashboard() {
                             <div>
                               <p className="text-xs font-medium text-gray-500 mb-1">Bottom</p>
                               <img
-                                src={ad.bottomImage}
+                                src={getImageUrl(ad._id, 'bottom')}
                                 alt={`${ad.title} - Bottom`}
                                 className="h-10 sm:h-12 w-auto object-cover rounded border"
                               />
                             </div>
-                            {ad.fullscreenImage && (
+                            {(ad.fullscreenImage || ad.fullscreenImageGridFS) && (
                               <div>
                                 <p className="text-xs font-medium text-gray-500 mb-1">Full</p>
                                 <img
-                                  src={ad.fullscreenImage}
+                                  src={getImageUrl(ad._id, 'fullscreen')}
                                   alt={`${ad.title} - Fullscreen`}
                                   className="h-10 sm:h-12 w-auto object-cover rounded border"
                                 />
@@ -286,7 +294,7 @@ export default function Dashboard() {
                         </td>
                         <td className="px-2 sm:px-4 lg:px-6 py-4">
                           <div className="text-xs sm:text-sm font-medium text-gray-900">{ad.title}</div>
-                          {ad.fullscreenImage ? (
+                          {(ad.fullscreenImage || ad.fullscreenImageGridFS) ? (
                             <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 mt-1">
                               With Fullscreen
                             </span>
