@@ -110,11 +110,29 @@ export default function Dashboard() {
     console.log('📝 [FRONTEND] Fetching complete ad data for editing:', ad._id);
     
     try {
-      // Fetch complete ad data including images
+      // Fetch complete ad data
       const response = await api.get(`/ads/${ad._id}`);
       const completeAd = response.data.data;
       
       console.log('✅ [FRONTEND] Complete ad data fetched');
+      console.log('   bottomImage length:', completeAd.bottomImage?.length || 0);
+      console.log('   fullscreenImage length:', completeAd.fullscreenImage?.length || 0);
+      console.log('   bottomImageGridFS:', completeAd.bottomImageGridFS || 'none');
+      console.log('   fullscreenImageGridFS:', completeAd.fullscreenImageGridFS || 'none');
+      
+      // If images are in GridFS (empty bottomImage/fullscreenImage strings), 
+      // use the image endpoint URLs instead
+      if ((!completeAd.bottomImage || completeAd.bottomImage.length < 100) && completeAd.bottomImageGridFS) {
+        console.log('🔄 [FRONTEND] Bottom image in GridFS - using endpoint URL');
+        completeAd.bottomImage = getImageUrl(ad._id, 'bottom');
+      }
+      
+      if ((!completeAd.fullscreenImage || completeAd.fullscreenImage.length < 100) && completeAd.fullscreenImageGridFS) {
+        console.log('🔄 [FRONTEND] Fullscreen image in GridFS - using endpoint URL');
+        completeAd.fullscreenImage = getImageUrl(ad._id, 'fullscreen');
+      }
+      
+      console.log('✅ [FRONTEND] Images ready for edit form');
       console.log('   Has bottomImage:', !!completeAd.bottomImage);
       console.log('   Has fullscreenImage:', !!completeAd.fullscreenImage);
       
