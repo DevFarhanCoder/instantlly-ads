@@ -404,6 +404,8 @@ export default function Dashboard() {
 // Ad Modal Component
 function AdModal({ ad, onClose }: { ad: Ad | null; onClose: () => void }) {
   const queryClient = useQueryClient();
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
   const [formData, setFormData] = useState({
     title: ad?.title || '',
     bottomImage: ad?.bottomImage || '',
@@ -416,10 +418,32 @@ function AdModal({ ad, onClose }: { ad: Ad | null; onClose: () => void }) {
 
   const saveMutation = useMutation({
     mutationFn: async (data: any) => {
-      if (ad) {
-        await api.put(`/ads/${ad._id}`, data);
-      } else {
-        await api.post('/ads', data);
+      setIsUploading(true);
+      setUploadProgress(0);
+      
+      try {
+        if (ad) {
+          await api.put(`/ads/${ad._id}`, data, {
+            onUploadProgress: (progressEvent) => {
+              const percentCompleted = progressEvent.total
+                ? Math.round((progressEvent.loaded * 100) / progressEvent.total)
+                : 0;
+              setUploadProgress(percentCompleted);
+            },
+          });
+        } else {
+          await api.post('/ads', data, {
+            onUploadProgress: (progressEvent) => {
+              const percentCompleted = progressEvent.total
+                ? Math.round((progressEvent.loaded * 100) / progressEvent.total)
+                : 0;
+              setUploadProgress(percentCompleted);
+            },
+          });
+        }
+      } finally {
+        setIsUploading(false);
+        setUploadProgress(0);
       }
     },
     onSuccess: () => {
@@ -569,16 +593,40 @@ function AdModal({ ad, onClose }: { ad: Ad | null; onClose: () => void }) {
               type="button"
               onClick={onClose}
               className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition font-medium"
+              disabled={isUploading}
             >
               Cancel
             </button>
-            <button
-              type="submit"
-              disabled={saveMutation.isPending}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 font-medium"
-            >
-              {saveMutation.isPending ? 'Saving...' : ad ? 'Update Advertisement' : 'Create Advertisement'}
-            </button>
+            <div className="flex-1 max-w-xs">
+              {isUploading && (
+                <div className="mb-2">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-xs font-medium text-blue-600">Uploading...</span>
+                    <span className="text-xs font-medium text-blue-600">{uploadProgress}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out"
+                      style={{ width: `${uploadProgress}%` }}
+                    ></div>
+                  </div>
+                </div>
+              )}
+              <button
+                type="submit"
+                disabled={saveMutation.isPending || isUploading}
+                className="w-full px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 font-medium"
+              >
+                {isUploading 
+                  ? `Uploading ${uploadProgress}%` 
+                  : saveMutation.isPending 
+                    ? 'Saving...' 
+                    : ad 
+                      ? 'Update Advertisement' 
+                      : 'Create Advertisement'
+                }
+              </button>
+            </div>
           </div>
         </form>
       </div>
