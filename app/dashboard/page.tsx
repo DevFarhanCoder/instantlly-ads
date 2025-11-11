@@ -159,6 +159,31 @@ export default function Dashboard() {
     return now >= start && now <= end;
   };
 
+  // Check if ad is expired
+  const isAdExpired = (ad: Ad) => {
+    const now = new Date();
+    const end = new Date(ad.endDate);
+    return now > end;
+  };
+
+  // Check if ad is scheduled (not started yet)
+  const isAdScheduled = (ad: Ad) => {
+    const now = new Date();
+    const start = new Date(ad.startDate);
+    return now < start;
+  };
+
+  // Get ad status for display
+  const getAdStatus = (ad: Ad) => {
+    if (isAdActive(ad)) {
+      return { label: '✓ Active', color: 'bg-green-100 text-green-800' };
+    } else if (isAdExpired(ad)) {
+      return { label: '⏰ Expired', color: 'bg-red-100 text-red-800' };
+    } else {
+      return { label: '⏸ Scheduled', color: 'bg-gray-100 text-gray-600' };
+    }
+  };
+
   // Filter ads based on search query
   const filteredAds = adsData?.filter((ad: Ad) => {
     if (!searchQuery.trim()) return true;
@@ -322,7 +347,7 @@ export default function Dashboard() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredAds.map((ad: Ad, index: number) => {
-                    const active = isAdActive(ad);
+                    const status = getAdStatus(ad);
                     return (
                       <tr key={ad._id} className="hover:bg-gray-50">
                         <td className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm font-medium text-gray-900">{index + 1}</td>
@@ -369,13 +394,9 @@ export default function Dashboard() {
                         </td>
                         <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap">
                           <span
-                            className={`px-2 sm:px-3 py-1 rounded-full text-xs font-semibold ${
-                              active
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-gray-100 text-gray-600'
-                            }`}
+                            className={`px-2 sm:px-3 py-1 rounded-full text-xs font-semibold ${status.color}`}
                           >
-                            {active ? '✓ Active' : '⏸ Scheduled'}
+                            {status.label}
                           </span>
                         </td>
                         <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium">
