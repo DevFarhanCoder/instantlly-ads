@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { PlusCircle, Trash2, Edit, Calendar, LogOut, LayoutGrid } from 'lucide-react';
@@ -33,6 +33,9 @@ export default function Dashboard() {
   const [showModal, setShowModal] = useState(false);
   const [editingAd, setEditingAd] = useState<Ad | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'expired' | 'scheduled'>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const adsPerPage = 40;
   const queryClient = useQueryClient();
   const router = useRouter();
 
@@ -184,15 +187,34 @@ export default function Dashboard() {
     }
   };
 
-  // Filter ads based on search query
+  // Filter ads based on search query and status
   const filteredAds = adsData?.filter((ad: Ad) => {
-    if (!searchQuery.trim()) return true;
-    const query = searchQuery.toLowerCase();
-    return (
-      ad.title.toLowerCase().includes(query) ||
-      ad.phoneNumber.toLowerCase().includes(query)
-    );
+    // Search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      const matchesSearch = ad.title.toLowerCase().includes(query) || ad.phoneNumber.toLowerCase().includes(query);
+      if (!matchesSearch) return false;
+    }
+    
+    // Status filter
+    if (statusFilter === 'all') return true;
+    if (statusFilter === 'active') return isAdActive(ad);
+    if (statusFilter === 'expired') return isAdExpired(ad);
+    if (statusFilter === 'scheduled') return isAdScheduled(ad);
+    
+    return true;
   }) || [];
+
+  // Pagination
+  const totalPages = Math.ceil(filteredAds.length / adsPerPage);
+  const startIndex = (currentPage - 1) * adsPerPage;
+  const endIndex = startIndex + adsPerPage;
+  const paginatedAds = filteredAds.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -273,13 +295,23 @@ export default function Dashboard() {
           <div className="p-6 border-b">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <h2 className="text-xl font-bold text-gray-900">All Advertisements</h2>
-              <div className="w-full sm:w-auto sm:min-w-[300px]">
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'expired' | 'scheduled')}
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                >
+                  <option value="all">All Status</option>
+                  <option value="active">Active</option>
+                  <option value="expired">Expired</option>
+                  <option value="scheduled">Scheduled</option>
+                </select>
                 <input
                   type="text"
                   placeholder="Search by title or phone..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="flex-1 sm:min-w-[300px] px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
             </div>
@@ -346,11 +378,12 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredAds.map((ad: Ad, index: number) => {
+                  {paginatedAds.map((ad: Ad, index: number) => {
                     const status = getAdStatus(ad);
+                    const globalIndex = startIndex + index + 1;
                     return (
                       <tr key={ad._id} className="hover:bg-gray-50">
-                        <td className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm font-medium text-gray-900">{index + 1}</td>
+                        <td className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm font-medium text-gray-900">{globalIndex}</td>
                         <td className="px-2 sm:px-4 lg:px-6 py-4">
                           <div className="flex flex-col space-y-2">
                             <div>
@@ -433,6 +466,64 @@ export default function Dashboard() {
               </div>
             )}
           </div>
+          
+          {/* Pagination Controls */}
+          {filteredAds.length > 0 && totalPages > 1 && (
+            <div className="p-4 border-t flex items-center justify-between">
+              <div className="text-sm text-gray-700">
+                Showing {startIndex + 1} to {Math.min(endIndex, filteredAds.length)} of {filteredAds.length} ads
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Previous
+                </button>
+                
+                {/* Page numbers */}
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => {
+                    // Show first page, last page, current page, and pages around current
+                    if (
+                      page === 1 ||
+                      page === totalPages ||
+                      (page >= currentPage - 1 && page <= currentPage + 1)
+                    ) {
+                      return (
+                        <button
+                          key={page}
+                          onClick={() => setCurrentPage(page)}
+                          className={`px-3 py-1 rounded-lg text-sm font-medium ${
+                            currentPage === page
+                              ? 'bg-blue-600 text-white'
+                              : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      );
+                    } else if (
+                      page === currentPage - 2 ||
+                      page === currentPage + 2
+                    ) {
+                      return <span key={page} className="px-2 text-gray-400">...</span>;
+                    }
+                    return null;
+                  })}
+                </div>
+                
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </main>
 
