@@ -32,6 +32,7 @@ const getImageUrl = (adId: string, type: 'bottom' | 'fullscreen') => {
 export default function Dashboard() {
   const [showModal, setShowModal] = useState(false);
   const [editingAd, setEditingAd] = useState<Ad | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const queryClient = useQueryClient();
   const router = useRouter();
 
@@ -158,6 +159,16 @@ export default function Dashboard() {
     return now >= start && now <= end;
   };
 
+  // Filter ads based on search query
+  const filteredAds = adsData?.filter((ad: Ad) => {
+    if (!searchQuery.trim()) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      ad.title.toLowerCase().includes(query) ||
+      ad.phoneNumber.toLowerCase().includes(query)
+    );
+  }) || [];
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -235,7 +246,18 @@ export default function Dashboard() {
         {/* Ads List */}
         <div className="bg-white rounded-lg shadow-sm border">
           <div className="p-6 border-b">
-            <h2 className="text-xl font-bold text-gray-900">All Advertisements</h2>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <h2 className="text-xl font-bold text-gray-900">All Advertisements</h2>
+              <div className="w-full sm:w-auto sm:min-w-[300px]">
+                <input
+                  type="text"
+                  placeholder="Search by title or phone..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
           </div>
           <div className="overflow-x-auto">
             {isLoading ? (
@@ -285,6 +307,7 @@ export default function Dashboard() {
                 </div>
               </div>
             ) : adsData && adsData.length > 0 ? (
+              filteredAds.length > 0 ? (
               <table className="w-full min-w-full">
                 <thead className="bg-gray-50">
                   <tr>
@@ -298,7 +321,7 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {adsData.map((ad: Ad, index: number) => {
+                  {filteredAds.map((ad: Ad, index: number) => {
                     const active = isAdActive(ad);
                     return (
                       <tr key={ad._id} className="hover:bg-gray-50">
@@ -378,6 +401,11 @@ export default function Dashboard() {
                   })}
                 </tbody>
               </table>
+              ) : (
+                <div className="p-8 text-center text-gray-500">
+                  No ads match your search. Try a different search term.
+                </div>
+              )
             ) : (
               <div className="p-8 text-center text-gray-500">
                 No ads found. Create your first ad to get started!
@@ -449,7 +477,12 @@ function AdModal({ ad, onClose }: { ad: Ad | null; onClose: () => void }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ads'] });
       queryClient.invalidateQueries({ queryKey: ['analytics'] });
+      alert('✅ Advertisement ' + (ad ? 'updated' : 'created') + ' successfully!');
       onClose();
+    },
+    onError: (error: any) => {
+      console.error('Failed to save ad:', error);
+      alert('❌ Failed to ' + (ad ? 'update' : 'create') + ' advertisement. Please try again.\n\nError: ' + (error.response?.data?.message || error.message));
     },
   });
 
