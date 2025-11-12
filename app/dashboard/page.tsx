@@ -39,24 +39,12 @@ export default function Dashboard() {
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  // Validate token on mount
+  // Validate token on mount - but only check existence, let API calls handle validation
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     if (!token) {
       router.push('/login');
-      return;
     }
-    
-    // Validate token format by making a quick verify request
-    api.get('/admin-auth/verify')
-      .catch((error) => {
-        if (error.response?.status === 401) {
-          console.log('🔄 Token validation failed - redirecting to login');
-          localStorage.removeItem('authToken');
-          localStorage.removeItem('adminData');
-          router.push('/login');
-        }
-      });
   }, [router]);
 
   const handleLogout = () => {

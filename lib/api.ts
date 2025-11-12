@@ -19,26 +19,29 @@ api.interceptors.request.use((config) => {
 });
 
 // Handle authentication errors automatically
+let isRedirecting = false;
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Check if it's an authentication error with invalid token format
-    if (
-      error.response?.status === 401 &&
-      error.response?.data?.message?.includes('Invalid user ID format in token')
-    ) {
-      console.log('🔄 Invalid token detected - auto-clearing and redirecting to login');
+    // Check if it's an authentication error
+    if (error.response?.status === 401 && !isRedirecting) {
+      // Don't redirect if we're already on the login page or already redirecting
+      const isLoginPage = typeof window !== 'undefined' && window.location.pathname === '/login';
       
-      // Clear the invalid token
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('adminData');
-      
-      // Redirect to login page
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
+      if (!isLoginPage) {
+        console.log('🔄 Authentication failed - clearing token and redirecting to login');
+        isRedirecting = true;
+        
+        // Clear the invalid token
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('adminData');
+        
+        // Redirect to login page
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
       }
-      
-      return Promise.reject(new Error('Session expired. Please login again.'));
     }
     
     return Promise.reject(error);
