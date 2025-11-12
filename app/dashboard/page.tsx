@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { PlusCircle, Trash2, Edit, Calendar, LogOut, LayoutGrid } from 'lucide-react';
+import { PlusCircle, Trash2, Edit, Calendar, LogOut, LayoutGrid, AlertCircle } from 'lucide-react';
 import api from '@/lib/api';
 import { format } from 'date-fns';
+import Link from 'next/link';
 
 interface Ad {
   _id: string;
@@ -240,6 +241,13 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              <Link
+                href="/pending-ads"
+                className="bg-yellow-600 text-white px-3 sm:px-4 py-2 rounded-lg flex items-center space-x-1 sm:space-x-2 hover:bg-yellow-700 transition flex-1 sm:flex-initial justify-center"
+              >
+                <AlertCircle size={18} className="sm:w-5 sm:h-5" />
+                <span className="text-sm sm:text-base">Pending Ads</span>
+              </Link>
               <button
                 onClick={() => {
                   setEditingAd(null);
