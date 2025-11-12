@@ -18,4 +18,31 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Handle authentication errors automatically
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Check if it's an authentication error with invalid token format
+    if (
+      error.response?.status === 401 &&
+      error.response?.data?.message?.includes('Invalid user ID format in token')
+    ) {
+      console.log('🔄 Invalid token detected - auto-clearing and redirecting to login');
+      
+      // Clear the invalid token
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('adminData');
+      
+      // Redirect to login page
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+      
+      return Promise.reject(new Error('Session expired. Please login again.'));
+    }
+    
+    return Promise.reject(error);
+  }
+);
+
 export default api;
