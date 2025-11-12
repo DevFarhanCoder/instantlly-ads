@@ -35,7 +35,7 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'expired' | 'scheduled'>('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const adsPerPage = 40;
+  const adsPerPage = 20;
   const queryClient = useQueryClient();
   const router = useRouter();
 
