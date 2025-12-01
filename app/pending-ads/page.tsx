@@ -108,7 +108,7 @@ export default function PendingAdsPage() {
   };
 
   const getImageUrl = (imageId: string) => {
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://instantlly-cards-backend.onrender.com';
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.instantllycards.com';
     return `${baseUrl}/api/ads/images/${imageId}`;
   };
 

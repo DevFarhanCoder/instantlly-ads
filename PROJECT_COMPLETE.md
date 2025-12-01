@@ -217,7 +217,7 @@ const handleAdClick = (ad: any) => {
 ### Backend:
 - [ ] Add `app.use('/api/ads', adsRoutes)` to main server file
 - [ ] Deploy backend to Render
-- [ ] Test: `curl https://instantlly-cards-backend-6ki0.onrender.com/api/ads/active`
+- [ ] Test: `curl https://api.instantllycards.com/api/ads/active`
 - [ ] Should return: `{"success":true,"data":[]}`
 
 ### Dashboard:
@@ -290,7 +290,7 @@ npm run build
 ## 📞 Support & Resources
 
 - **Dashboard:** https://instantlly-ads.vercel.app
-- **Backend API:** https://instantlly-cards-backend-6ki0.onrender.com
+- **Backend API:** https://api.instantllycards.com
 - **Documentation:** See DEPLOYMENT_GUIDE.md
 - **Source Code:** /instantlly-ads/
 

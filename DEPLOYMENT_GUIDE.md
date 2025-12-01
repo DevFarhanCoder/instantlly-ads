@@ -61,7 +61,7 @@ git push
 Test the API:
 ```bash
 # Get active ads
-curl https://instantlly-cards-backend-6ki0.onrender.com/api/ads/active
+curl https://api.instantllycards.com/api/ads/active
 
 # Should return: {"success":true,"data":[]}
 ```
@@ -95,7 +95,7 @@ git push -u origin main
 
 5. Add Environment Variable:
    ```
-   NEXT_PUBLIC_API_BASE = https://instantlly-cards-backend-6ki0.onrender.com
+   NEXT_PUBLIC_API_BASE = https://api.instantllycards.com
    ```
 
 6. Click "Deploy"
@@ -267,7 +267,7 @@ npm run dev
 ```
 
 ### API errors?
-- Check backend is running: https://instantlly-cards-backend-6ki0.onrender.com/api/ads/active
+- Check backend is running: https://api.instantllycards.com/api/ads/active
 - Verify environment variable in Vercel
 
 ### Ads not showing in app?
@@ -330,7 +330,7 @@ GET    /api/ads/analytics/summary         - Get analytics
 ## 📞 Support
 
 Dashboard URL: https://instantlly-ads.vercel.app
-Backend API: https://instantlly-cards-backend-6ki0.onrender.com
+Backend API: https://api.instantllycards.com
 Mobile App: Instantlly Cards (Play Store)
 
 ---

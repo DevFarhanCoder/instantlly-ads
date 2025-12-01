@@ -26,7 +26,7 @@ interface Ad {
 
 // Helper to construct image URL
 const getImageUrl = (adId: string, type: 'bottom' | 'fullscreen') => {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://instantlly-cards-backend-6ki0.onrender.com';
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.instantllycards.com';
   return `${baseUrl}/api/ads/image/${adId}/${type}`;
 };
 

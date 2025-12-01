@@ -38,7 +38,7 @@ npm start
 
 1. Push code to GitHub
 2. Import project in Vercel
-3. Set environment variable: `NEXT_PUBLIC_API_BASE=https://instantlly-cards-backend-6ki0.onrender.com`
+3. Set environment variable: `NEXT_PUBLIC_API_BASE=https://api.instantllycards.com`
 4. Deploy!
 
 ## Backend Setup Required
@@ -104,7 +104,7 @@ No app update needed when you change ads!
 Create `.env.local`:
 
 ```
-NEXT_PUBLIC_API_BASE=https://instantlly-cards-backend-6ki0.onrender.com
+NEXT_PUBLIC_API_BASE=https://api.instantllycards.com
 ```
 
 ## License
