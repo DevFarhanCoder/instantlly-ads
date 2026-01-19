@@ -107,9 +107,9 @@ export default function PendingAdsPage() {
     }
   };
 
-  const getImageUrl = (imageId: string) => {
+  const getImageUrl = (adId: string, type: 'bottom' | 'fullscreen') => {
     const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.instantllycards.com';
-    return `${baseUrl}/api/ads/images/${imageId}`;
+    return `${baseUrl}/api/ads/image/${adId}/${type}`;
   };
 
   return (
@@ -190,18 +190,26 @@ export default function PendingAdsPage() {
                         <div className="flex gap-2">
                           {ad.bottomImageId && (
                             <img
-                              src={getImageUrl(ad.bottomImageId)}
+                              src={getImageUrl(ad.id, 'bottom')}
                               alt="Bottom"
                               className="h-16 w-20 object-cover rounded cursor-pointer hover:scale-105 transition"
-                              onClick={() => window.open(getImageUrl(ad.bottomImageId!), '_blank')}
+                              onClick={() => window.open(getImageUrl(ad.id, 'bottom'), '_blank')}
+                              onError={(e) => {
+                                console.error('Failed to load bottom image:', getImageUrl(ad.id, 'bottom'));
+                                e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%2250%22%3E%3Crect fill=%22%23f3f4f6%22 width=%22100%22 height=%2250%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23adb5bd%22 font-size=%2210%22%3EImage Error%3C/text%3E%3C/svg%3E';
+                              }}
                             />
                           )}
                           {ad.fullscreenImageId && (
                             <img
-                              src={getImageUrl(ad.fullscreenImageId)}
+                              src={getImageUrl(ad.id, 'fullscreen')}
                               alt="Fullscreen"
                               className="h-16 w-20 object-cover rounded cursor-pointer hover:scale-105 transition"
-                              onClick={() => window.open(getImageUrl(ad.fullscreenImageId!), '_blank')}
+                              onClick={() => window.open(getImageUrl(ad.id, 'fullscreen'), '_blank')}
+                              onError={(e) => {
+                                console.error('Failed to load fullscreen image:', getImageUrl(ad.id, 'fullscreen'));
+                                e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%2250%22%3E%3Crect fill=%22%23f3f4f6%22 width=%22100%22 height=%2250%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23adb5bd%22 font-size=%2210%22%3EImage Error%3C/text%3E%3C/svg%3E';
+                              }}
                             />
                           )}
                         </div>
