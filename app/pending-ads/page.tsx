@@ -18,8 +18,13 @@ interface PendingAd {
   uploadedBy: string;
   uploaderName: string;
   priority: number;
+  adType?: 'image' | 'video';
   bottomImageId?: string;
   fullscreenImageId?: string;
+  bottomVideoId?: string;
+  fullscreenVideoId?: string;
+  hasBottomVideo?: boolean;
+  hasFullscreenVideo?: boolean;
   impressions: number;
   clicks: number;
   createdAt: string;
@@ -188,33 +193,77 @@ export default function PendingAdsPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{index + 1}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex gap-2">
-                          {ad.bottomImageId && (
-                            <img
-                              src={getImageUrl(ad.id, 'bottom')}
-                              alt="Bottom"
-                              className="h-16 w-20 object-cover rounded cursor-pointer hover:scale-105 transition"
-                              onClick={() => window.open(getImageUrl(ad.id, 'bottom'), '_blank')}
-                              onError={(e) => {
-                                console.error('Failed to load bottom image:', getImageUrl(ad.id, 'bottom'));
-                                e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%2250%22%3E%3Crect fill=%22%23f3f4f6%22 width=%22100%22 height=%2250%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23adb5bd%22 font-size=%2210%22%3EImage Error%3C/text%3E%3C/svg%3E';
-                              }}
-                            />
-                          )}
-                          {ad.fullscreenImageId && (
-                            <img
-                              src={getImageUrl(ad.id, 'fullscreen')}
-                              alt="Fullscreen"
-                              className="h-16 w-20 object-cover rounded cursor-pointer hover:scale-105 transition"
-                              onClick={() => window.open(getImageUrl(ad.id, 'fullscreen'), '_blank')}
-                              onError={(e) => {
-                                console.error('Failed to load fullscreen image:', getImageUrl(ad.id, 'fullscreen'));
-                                e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%2250%22%3E%3Crect fill=%22%23f3f4f6%22 width=%22100%22 height=%2250%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23adb5bd%22 font-size=%2210%22%3EImage Error%3C/text%3E%3C/svg%3E';
-                              }}
-                            />
+                          {/* Check if it's a video ad */}
+                          {ad.adType === 'video' ? (
+                            <>
+                              {ad.hasBottomVideo && (
+                                <div className="relative h-16 w-20 bg-gray-100 rounded overflow-hidden cursor-pointer hover:scale-105 transition group">
+                                  <video 
+                                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/channel-partner/ads/video/${ad.bottomVideoId}`}
+                                    className="h-full w-full object-cover"
+                                  />
+                                  <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                                    <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                      <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+                                    </svg>
+                                  </div>
+                                  <span className="absolute top-1 right-1 bg-purple-600 text-white text-xs px-1 rounded">Bottom</span>
+                                </div>
+                              )}
+                              {ad.hasFullscreenVideo && (
+                                <div className="relative h-16 w-20 bg-gray-100 rounded overflow-hidden cursor-pointer hover:scale-105 transition group">
+                                  <video 
+                                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/channel-partner/ads/video/${ad.fullscreenVideoId}`}
+                                    className="h-full w-full object-cover"
+                                  />
+                                  <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                                    <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                      <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+                                    </svg>
+                                  </div>
+                                  <span className="absolute top-1 right-1 bg-purple-600 text-white text-xs px-1 rounded">Full</span>
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              {/* Image ad (existing code) */}
+                              {ad.bottomImageId && (
+                                <img
+                                  src={getImageUrl(ad.id, 'bottom')}
+                                  alt="Bottom"
+                                  className="h-16 w-20 object-cover rounded cursor-pointer hover:scale-105 transition"
+                                  onClick={() => window.open(getImageUrl(ad.id, 'bottom'), '_blank')}
+                                  onError={(e) => {
+                                    console.error('Failed to load bottom image:', getImageUrl(ad.id, 'bottom'));
+                                    e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%2250%22%3E%3Crect fill=%22%23f3f4f6%22 width=%22100%22 height=%2250%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23adb5bd%22 font-size=%2210%22%3EImage Error%3C/text%3E%3C/svg%3E';
+                                  }}
+                                />
+                              )}
+                              {ad.fullscreenImageId && (
+                                <img
+                                  src={getImageUrl(ad.id, 'fullscreen')}
+                                  alt="Fullscreen"
+                                  className="h-16 w-20 object-cover rounded cursor-pointer hover:scale-105 transition"
+                                  onClick={() => window.open(getImageUrl(ad.id, 'fullscreen'), '_blank')}
+                                  onError={(e) => {
+                                    console.error('Failed to load fullscreen image:', getImageUrl(ad.id, 'fullscreen'));
+                                    e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%2250%22%3E%3Crect fill=%22%23f3f4f6%22 width=%22100%22 height=%2250%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23adb5bd%22 font-size=%2210%22%3EImage Error%3C/text%3E%3C/svg%3E';
+                                  }}
+                                />
+                              )}
+                            </>
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">{ad.title}</td>
+                      <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
+                        {ad.title}
+                        {ad.adType === 'video' && (
+                          <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                            VIDEO
+                          </span>
+                        )}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm">
                           <div className="font-medium text-gray-900">{ad.uploaderName}</div>
