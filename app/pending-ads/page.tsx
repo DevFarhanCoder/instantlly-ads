@@ -188,7 +188,16 @@ export default function PendingAdsPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {pendingAds.map((ad, index) => (
+                  {pendingAds.map((ad, index) => {
+                    // Debug: Log ad data
+                    console.log('Ad data:', ad);
+                    console.log('Ad type:', ad.adType);
+                    console.log('Has bottom video:', ad.hasBottomVideo);
+                    console.log('Bottom video ID:', ad.bottomVideoId);
+                    console.log('Has fullscreen video:', ad.hasFullscreenVideo);
+                    console.log('Fullscreen video ID:', ad.fullscreenVideoId);
+                    
+                    return (
                     <tr key={ad.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{index + 1}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -197,10 +206,17 @@ export default function PendingAdsPage() {
                           {ad.adType === 'video' ? (
                             <>
                               {ad.hasBottomVideo && (
-                                <div className="relative h-16 w-20 bg-gray-100 rounded overflow-hidden cursor-pointer hover:scale-105 transition group">
+                                <div 
+                                  className="relative h-16 w-20 bg-gray-100 rounded overflow-hidden cursor-pointer hover:scale-105 transition group"
+                                  onClick={() => window.open(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/channel-partner/ads/video/${ad.bottomVideoId}`, '_blank')}
+                                >
                                   <video 
-                                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/channel-partner/ads/video/${ad.bottomVideoId}`}
+                                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/channel-partner/ads/video/${ad.bottomVideoId}`}
                                     className="h-full w-full object-cover"
+                                    onError={(e) => {
+                                      console.error('Failed to load bottom video:', `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/channel-partner/ads/video/${ad.bottomVideoId}`);
+                                      console.error('Video element error:', e);
+                                    }}
                                   />
                                   <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
                                     <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -211,10 +227,17 @@ export default function PendingAdsPage() {
                                 </div>
                               )}
                               {ad.hasFullscreenVideo && (
-                                <div className="relative h-16 w-20 bg-gray-100 rounded overflow-hidden cursor-pointer hover:scale-105 transition group">
+                                <div 
+                                  className="relative h-16 w-20 bg-gray-100 rounded overflow-hidden cursor-pointer hover:scale-105 transition group"
+                                  onClick={() => window.open(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/channel-partner/ads/video/${ad.fullscreenVideoId}`, '_blank')}
+                                >
                                   <video 
-                                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/channel-partner/ads/video/${ad.fullscreenVideoId}`}
+                                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/channel-partner/ads/video/${ad.fullscreenVideoId}`}
                                     className="h-full w-full object-cover"
+                                    onError={(e) => {
+                                      console.error('Failed to load fullscreen video:', `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/channel-partner/ads/video/${ad.fullscreenVideoId}`);
+                                      console.error('Video element error:', e);
+                                    }}
                                   />
                                   <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
                                     <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -305,7 +328,8 @@ export default function PendingAdsPage() {
                         </div>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
