@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { PlusCircle, Trash2, Edit, Calendar, LogOut, LayoutGrid, AlertCircle } from 'lucide-react';
@@ -11,10 +11,15 @@ import Link from 'next/link';
 interface Ad {
   _id: string;
   title: string;
+  adType?: 'image' | 'video';
   bottomImage?: string; // Now optional (excluded from list query)
   fullscreenImage?: string; // Now optional (excluded from list query)
   bottomImageGridFS?: string; // GridFS reference
   fullscreenImageGridFS?: string; // GridFS reference
+  bottomVideoId?: string;
+  fullscreenVideoId?: string;
+  hasBottomVideo?: boolean;
+  hasFullscreenVideo?: boolean;
   phoneNumber: string;
   startDate: string;
   endDate: string;
@@ -36,6 +41,7 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'expired' | 'scheduled'>('all');
   const [currentPage, setCurrentPage] = useState(1);
+  const [videoModal, setVideoModal] = useState<{ show: boolean; url: string; title: string }>({ show: false, url: '', title: '' });
   const adsPerPage = 20;
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -327,7 +333,7 @@ export default function Dashboard() {
                   placeholder="Search by title or phone..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="flex-1 sm:min-w-[300px] px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="flex-1 sm:min-w-[300px] px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-500"
                 />
               </div>
             </div>
@@ -402,29 +408,105 @@ export default function Dashboard() {
                         <td className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm font-medium text-gray-900">{globalIndex}</td>
                         <td className="px-2 sm:px-4 lg:px-6 py-4">
                           <div className="flex flex-col space-y-2">
-                            <div>
-                              <p className="text-xs font-medium text-gray-500 mb-1">Bottom</p>
-                              <img
-                                src={getImageUrl(ad._id, 'bottom')}
-                                alt={`${ad.title} - Bottom`}
-                                className="h-10 sm:h-12 w-auto object-cover rounded border"
-                              />
-                            </div>
-                            {(ad.fullscreenImage || ad.fullscreenImageGridFS) && (
-                              <div>
-                                <p className="text-xs font-medium text-gray-500 mb-1">Full</p>
-                                <img
-                                  src={getImageUrl(ad._id, 'fullscreen')}
-                                  alt={`${ad.title} - Fullscreen`}
-                                  className="h-10 sm:h-12 w-auto object-cover rounded border"
-                                />
-                              </div>
+                            {/* Check if it's a video ad */}
+                            {ad.adType === 'video' ? (
+                              <>
+                                {ad.hasBottomVideo && (
+                                  <div>
+                                    <p className="text-xs font-medium text-gray-500 mb-1">Bottom Video</p>
+                                    <div 
+                                      className="relative w-44 h-12 bg-gradient-to-br from-blue-100 to-purple-100 rounded overflow-hidden cursor-pointer group border border-gray-200"
+                                      onClick={() => setVideoModal({ 
+                                        show: true, 
+                                        url: `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/channel-partner/ads/video/${ad.bottomVideoId}`,
+                                        title: `${ad.title} - Bottom Video`
+                                      })}
+                                    >
+                                      <video 
+                                        src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/channel-partner/ads/video/${ad.bottomVideoId}#t=0.5`}
+                                        className="h-full w-full object-cover pointer-events-none"
+                                        preload="metadata"
+                                        muted
+                                        playsInline
+                                        onLoadedData={(e) => {
+                                          const video = e.target as HTMLVideoElement;
+                                          video.currentTime = 0.5;
+                                        }}
+                                      />
+                                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent flex items-center justify-center group-hover:from-black/70 group-hover:via-black/40 transition-all">
+                                        <div className="bg-white/90 rounded-full p-1.5 group-hover:bg-white group-hover:scale-110 transition-all">
+                                          <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+                                          </svg>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                                {ad.hasFullscreenVideo && (
+                                  <div>
+                                    <p className="text-xs font-medium text-gray-500 mb-1">Full Video</p>
+                                    <div 
+                                      className="relative w-12 h-16 bg-gradient-to-br from-purple-100 to-pink-100 rounded overflow-hidden cursor-pointer group border border-gray-200"
+                                      onClick={() => setVideoModal({ 
+                                        show: true, 
+                                        url: `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/channel-partner/ads/video/${ad.fullscreenVideoId}`,
+                                        title: `${ad.title} - Full Video`
+                                      })}
+                                    >
+                                      <video 
+                                        src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/channel-partner/ads/video/${ad.fullscreenVideoId}#t=0.5`}
+                                        className="h-full w-full object-cover pointer-events-none"
+                                        preload="metadata"
+                                        muted
+                                        playsInline
+                                        onLoadedData={(e) => {
+                                          const video = e.target as HTMLVideoElement;
+                                          video.currentTime = 0.5;
+                                        }}
+                                      />
+                                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent flex items-center justify-center group-hover:from-black/70 group-hover:via-black/40 transition-all">
+                                        <div className="bg-white/90 rounded-full p-1.5 group-hover:bg-white group-hover:scale-110 transition-all">
+                                          <svg className="w-4 h-4 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+                                          </svg>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                              </>
+                            ) : (
+                              <>
+                                <div>
+                                  <p className="text-xs font-medium text-gray-500 mb-1">Bottom</p>
+                                  <img
+                                    src={getImageUrl(ad._id, 'bottom')}
+                                    alt={`${ad.title} - Bottom`}
+                                    className="h-10 sm:h-12 w-auto object-cover rounded border"
+                                  />
+                                </div>
+                                {(ad.fullscreenImage || ad.fullscreenImageGridFS) && (
+                                  <div>
+                                    <p className="text-xs font-medium text-gray-500 mb-1">Full</p>
+                                    <img
+                                      src={getImageUrl(ad._id, 'fullscreen')}
+                                      alt={`${ad.title} - Fullscreen`}
+                                      className="h-10 sm:h-12 w-auto object-cover rounded border"
+                                    />
+                                  </div>
+                                )}
+                              </>
                             )}
                           </div>
                         </td>
                         <td className="px-2 sm:px-4 lg:px-6 py-4">
                           <div className="text-xs sm:text-sm font-medium text-gray-900">{ad.title}</div>
-                          {(ad.fullscreenImage || ad.fullscreenImageGridFS) ? (
+                          {ad.adType === 'video' ? (
+                            <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 mt-1">
+                              Video Ad
+                            </span>
+                          ) : (ad.fullscreenImage || ad.fullscreenImageGridFS) ? (
                             <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 mt-1">
                               With Fullscreen
                             </span>
@@ -564,6 +646,7 @@ function AdModal({ ad, onClose }: { ad: Ad | null; onClose: () => void }) {
   const [isUploading, setIsUploading] = useState(false);
   const [formData, setFormData] = useState({
     title: ad?.title || '',
+    mediaType: 'image' as 'image' | 'video',
     bottomImage: ad?.bottomImage || '',
     fullscreenImage: ad?.fullscreenImage || '',
     phoneNumber: ad?.phoneNumber || '',
@@ -642,114 +725,188 @@ function AdModal({ ad, onClose }: { ad: Ad | null; onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6 border-b">
-          <h2 className="text-2xl font-bold text-gray-900">
+    <>
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6 border-b flex items-center justify-between">
+          <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <span className="text-2xl">⊕</span>
             {ad ? 'Edit Advertisement' : 'Create New Advertisement'}
           </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 text-xl font-bold"
+          >
+            ✕ Cancel
+          </button>
         </div>
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Advertisement Title</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              📝 Advertisement Title <span className="text-red-500">*</span>
+            </label>
             <input
               type="text"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               placeholder="e.g., Summer Sale 2024"
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-700 text-gray-900"
               required
             />
           </div>
 
-          <div className="border-t pt-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">📱 Bottom Banner Image (Required)</h3>
-            <p className="text-sm text-gray-600 mb-4">
-              This image appears in the bottom carousel. Recommended size: <strong>624 × 174 pixels</strong>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              🖼️ Media Type <span className="text-red-500">*</span>
+            </label>
+            <div className="flex w-full rounded-lg overflow-hidden">
+              <button
+                type="button"
+                className={`flex-1 px-4 py-3 font-semibold transition flex items-center justify-center gap-2 ${
+                  formData.mediaType === 'image'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+                }`}
+                onClick={() => {
+                  setFormData({ ...formData, mediaType: 'image', bottomImage: '', fullscreenImage: '' });
+                }}
+              >
+                🖼️ Image
+              </button>
+              <button
+                type="button"
+                className={`flex-1 px-4 py-3 font-semibold transition flex items-center justify-center gap-2 ${
+                  formData.mediaType === 'video'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 border-l-0'
+                }`}
+                onClick={() => {
+                  setFormData({ ...formData, mediaType: 'video', bottomImage: '', fullscreenImage: '' });
+                }}
+              >
+                🎬 Video
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              Select whether your advertisement is an image or video
             </p>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleBottomImageUpload}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              required={!ad}
-            />
-            {formData.bottomImage && (
-              <div className="mt-4">
-                <p className="text-xs text-gray-500 mb-2">Preview:</p>
-                <img src={formData.bottomImage} alt="Bottom Banner Preview" className="max-h-32 rounded border shadow-sm" />
-              </div>
-            )}
           </div>
 
-          <div className="border-t pt-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">🖼️ Fullscreen Image (Optional)</h3>
-            <p className="text-sm text-gray-600 mb-4">
-              This image appears when user taps the bottom banner. Recommended size: <strong>624 × 1000 pixels</strong>
-              <br />
-              <span className="text-xs text-amber-600">
-                💡 If not provided, users will see Call/Message/Cancel buttons when they tap the banner.
-              </span>
-            </p>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFullscreenImageUpload}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            {formData.fullscreenImage && (
-              <div className="mt-4">
-                <p className="text-xs text-gray-500 mb-2">Preview:</p>
-                <img src={formData.fullscreenImage} alt="Fullscreen Preview" className="max-h-48 rounded border shadow-sm" />
-              </div>
-            )}
-          </div>
-
-          <div className="border-t pt-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">📞 Phone Number (for Call/Message buttons)</label>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              📞 Contact Phone Number <span className="text-red-500">*</span>
+            </label>
             <input
               type="tel"
               value={formData.phoneNumber}
               onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
               placeholder="+919876543210"
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-700 text-gray-900"
               required
             />
             <p className="text-xs text-gray-500 mt-1">
-              Used for Call/Message buttons in the mobile app
+              Users will see Call/Message buttons with this number
             </p>
           </div>
 
-          <div className="border-t pt-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">📅 Schedule</h3>
-            <p className="text-sm text-gray-600 mb-4">
-              Ad will automatically become active between these dates
-            </p>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
-                <input
-                  type="date"
-                  value={formData.startDate}
-                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">End Date</label>
-                <input
-                  type="date"
-                  value={formData.endDate}
-                  onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                📅 Start Date <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                value={formData.startDate}
+                onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                style={{ colorScheme: 'light' }}
+                required
+              />
+              <p className="text-xs text-gray-500 mt-1">Your ad will start on this date</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                📅 End Date <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                value={formData.endDate}
+                onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                style={{ colorScheme: 'light' }}
+                required
+              />
+              <p className="text-xs text-gray-500 mt-1">Your ad will end on this date</p>
             </div>
           </div>
 
-          <div className="flex justify-end space-x-3 pt-4 border-t">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                🖼️ Bottom Banner {formData.mediaType === 'image' ? 'Image' : 'Video'} <span className="text-red-500">* (624 × 174px)</span>
+              </label>
+              <input
+                type="file"
+                accept={formData.mediaType === 'image' ? 'image/*' : 'video/*'}
+                onChange={handleBottomImageUpload}
+                className="block w-full text-sm text-gray-500
+                  file:mr-4 file:py-2.5 file:px-4
+                  file:rounded-lg file:border-0
+                  file:text-sm file:font-semibold
+                  file:bg-blue-600 file:text-white
+                  hover:file:bg-blue-700 file:cursor-pointer
+                  border border-gray-300 rounded-lg
+                  cursor-pointer focus:outline-none"
+                required={!ad}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                This appears in the bottom carousel • {formData.mediaType === 'image' ? 'Image' : 'Video'} only
+              </p>
+              {formData.bottomImage && (
+                <div className="mt-2">
+                  {formData.mediaType === 'image' ? (
+                    <img src={formData.bottomImage} alt="Bottom Preview" className="h-20 rounded border shadow-sm object-cover" />
+                  ) : (
+                    <video src={formData.bottomImage} controls className="h-20 rounded border shadow-sm" />
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                🖼️ Fullscreen {formData.mediaType === 'image' ? 'Image' : 'Video'} (Optional) (624 × 1000px)
+              </label>
+              <input
+                type="file"
+                accept={formData.mediaType === 'image' ? 'image/*' : 'video/*'}
+                onChange={handleFullscreenImageUpload}
+                className="block w-full text-sm text-gray-500
+                  file:mr-4 file:py-2.5 file:px-4
+                  file:rounded-lg file:border-0
+                  file:text-sm file:font-semibold
+                  file:bg-blue-600 file:text-white
+                  hover:file:bg-blue-700 file:cursor-pointer
+                  border border-gray-300 rounded-lg
+                  cursor-pointer focus:outline-none"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Shown when user taps the banner • {formData.mediaType === 'image' ? 'Image' : 'Video'} only
+              </p>
+              {formData.fullscreenImage && (
+                <div className="mt-2">
+                  {formData.mediaType === 'image' ? (
+                    <img src={formData.fullscreenImage} alt="Fullscreen Preview" className="h-32 rounded border shadow-sm object-cover" />
+                  ) : (
+                    <video src={formData.fullscreenImage} controls className="h-32 rounded border shadow-sm" />
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex justify-end space-x-3 pt-6 mt-6 border-t">
             <button
               type="button"
               onClick={onClose}
@@ -776,20 +933,258 @@ function AdModal({ ad, onClose }: { ad: Ad | null; onClose: () => void }) {
               <button
                 type="submit"
                 disabled={saveMutation.isPending || isUploading}
-                className="w-full px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 font-medium"
+                className="w-full px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 font-semibold flex items-center justify-center gap-2"
               >
                 {isUploading 
                   ? `Uploading ${uploadProgress}%` 
                   : saveMutation.isPending 
                     ? 'Saving...' 
                     : ad 
-                      ? 'Update Advertisement' 
-                      : 'Create Advertisement'
+                      ? '⚡ Update Advertisement' 
+                      : '⚡ Submit Advertisement'
                 }
               </button>
             </div>
           </div>
         </form>
+      </div>
+    </div>
+    </>
+  );
+}
+
+// Image Crop Modal Component
+function ImageCropModal({
+  imageSrc,
+  targetWidth,
+  targetHeight,
+  onCrop,
+  onCancel,
+}: {
+  imageSrc: string;
+  targetWidth: number;
+  targetHeight: number;
+  onCrop: (croppedImage: string) => void;
+  onCancel: () => void;
+}) {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [cropArea, setCropArea] = useState({ x: 50, y: 50, width: 300, height: 300 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const imageRef = useRef<HTMLImageElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => {
+      imageRef.current = img;
+      setImageLoaded(true);
+      
+      // Calculate initial crop box based on aspect ratio
+      const aspectRatio = targetWidth / targetHeight;
+      const containerWidth = 600; // Max container width
+      const containerHeight = 400; // Max container height
+      
+      let boxWidth = Math.min(containerWidth * 0.7, 400);
+      let boxHeight = boxWidth / aspectRatio;
+      
+      if (boxHeight > containerHeight * 0.7) {
+        boxHeight = containerHeight * 0.7;
+        boxWidth = boxHeight * aspectRatio;
+      }
+      
+      setCropArea({
+        x: (containerWidth - boxWidth) / 2,
+        y: (containerHeight - boxHeight) / 2,
+        width: boxWidth,
+        height: boxHeight,
+      });
+    };
+    img.src = imageSrc;
+  }, [imageSrc, targetWidth, targetHeight]);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // Check if click is inside crop box
+    if (
+      x >= cropArea.x &&
+      x <= cropArea.x + cropArea.width &&
+      y >= cropArea.y &&
+      y <= cropArea.y + cropArea.height
+    ) {
+      setIsDragging(true);
+      setDragStart({ x: x - cropArea.x, y: y - cropArea.y });
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !containerRef.current) return;
+    
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const newX = Math.max(0, Math.min(x - dragStart.x, rect.width - cropArea.width));
+    const newY = Math.max(0, Math.min(y - dragStart.y, rect.height - cropArea.height));
+    
+    setCropArea({ ...cropArea, x: newX, y: newY });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleCrop = () => {
+    if (!imageRef.current || !containerRef.current) return;
+    
+    const canvas = document.createElement('canvas');
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const container = containerRef.current;
+    const img = imageRef.current;
+    
+    // Calculate the scale between displayed image and actual image
+    const displayedWidth = container.offsetWidth;
+    const displayedHeight = container.offsetHeight;
+    const scaleX = img.naturalWidth / displayedWidth;
+    const scaleY = img.naturalHeight / displayedHeight;
+
+    // Calculate crop coordinates in the original image
+    const sourceX = cropArea.x * scaleX;
+    const sourceY = cropArea.y * scaleY;
+    const sourceWidth = cropArea.width * scaleX;
+    const sourceHeight = cropArea.height * scaleY;
+
+    // Draw the cropped area onto canvas at exact target dimensions
+    ctx.drawImage(
+      img,
+      sourceX,
+      sourceY,
+      sourceWidth,
+      sourceHeight,
+      0,
+      0,
+      targetWidth,
+      targetHeight
+    );
+
+    const croppedImage = canvas.toDataURL('image/jpeg', 0.9);
+    onCrop(croppedImage);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4 z-[60]">
+      <div className="bg-white rounded-lg max-w-4xl w-full p-6">
+        <div className="mb-4">
+          <h3 className="text-xl font-bold text-gray-900">Crop Image</h3>
+          <p className="text-sm text-gray-500 mt-1">
+            Target size: {targetWidth} × {targetHeight}px • Drag the crop box to select area
+          </p>
+        </div>
+
+        <div className="mb-6 flex justify-center">
+          <div
+            ref={containerRef}
+            className="relative inline-block bg-black rounded-lg overflow-hidden"
+            style={{ maxWidth: '600px', maxHeight: '400px' }}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+          >
+            {imageLoaded && (
+              <>
+                <img
+                  src={imageSrc}
+                  alt="Crop preview"
+                  className="max-w-full max-h-[400px] block"
+                  draggable={false}
+                />
+                
+                {/* Overlay (darkened area outside crop box) */}
+                <div className="absolute inset-0 pointer-events-none">
+                  {/* Top overlay */}
+                  <div
+                    className="absolute top-0 left-0 right-0 bg-black bg-opacity-60"
+                    style={{ height: `${cropArea.y}px` }}
+                  />
+                  {/* Bottom overlay */}
+                  <div
+                    className="absolute left-0 right-0 bottom-0 bg-black bg-opacity-60"
+                    style={{ top: `${cropArea.y + cropArea.height}px` }}
+                  />
+                  {/* Left overlay */}
+                  <div
+                    className="absolute left-0 bg-black bg-opacity-60"
+                    style={{
+                      top: `${cropArea.y}px`,
+                      width: `${cropArea.x}px`,
+                      height: `${cropArea.height}px`,
+                    }}
+                  />
+                  {/* Right overlay */}
+                  <div
+                    className="absolute right-0 bg-black bg-opacity-60"
+                    style={{
+                      top: `${cropArea.y}px`,
+                      left: `${cropArea.x + cropArea.width}px`,
+                      height: `${cropArea.height}px`,
+                    }}
+                  />
+                </div>
+
+                {/* Crop Box */}
+                <div
+                  className="absolute border-2 border-white cursor-move"
+                  style={{
+                    left: `${cropArea.x}px`,
+                    top: `${cropArea.y}px`,
+                    width: `${cropArea.width}px`,
+                    height: `${cropArea.height}px`,
+                    boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.5)',
+                  }}
+                >
+                  {/* Corner indicators */}
+                  <div className="absolute -top-1 -left-1 w-4 h-4 bg-white border-2 border-blue-500 rounded-full" />
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-white border-2 border-blue-500 rounded-full" />
+                  <div className="absolute -bottom-1 -left-1 w-4 h-4 bg-white border-2 border-blue-500 rounded-full" />
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-white border-2 border-blue-500 rounded-full" />
+                  
+                  {/* Grid lines */}
+                  <div className="absolute left-1/3 top-0 bottom-0 w-px bg-white opacity-50" />
+                  <div className="absolute left-2/3 top-0 bottom-0 w-px bg-white opacity-50" />
+                  <div className="absolute top-1/3 left-0 right-0 h-px bg-white opacity-50" />
+                  <div className="absolute top-2/3 left-0 right-0 h-px bg-white opacity-50" />
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="flex justify-end space-x-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition font-medium"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleCrop}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold"
+          >
+            ✂️ Crop & Use Image
+          </button>
+        </div>
       </div>
     </div>
   );
