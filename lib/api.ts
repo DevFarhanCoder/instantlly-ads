@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // AWS Cloud (Primary) with Render backup
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE || 'https://api.instantllycards.com';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.instantllycards.com';
 const BACKUP_API_URL = 'https://instantlly-cards-backend-6ki0.onrender.com';
 
 const api = axios.create({
