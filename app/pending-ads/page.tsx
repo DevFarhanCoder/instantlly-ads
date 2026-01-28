@@ -260,9 +260,6 @@ export default function PendingAdsPage() {
                                     className="h-16 w-20 object-cover rounded cursor-pointer hover:scale-105 transition"
                                     onClick={() => window.open(getImageUrl(ad.id, 'bottom'), '_blank')}
                                     onError={(e) => {
-                                      const url = getImageUrl(ad.id, 'bottom');
-                                      console.error('Failed to load bottom image:', url);
-                                      console.error('Ad ID:', ad.id, 'GridFS ID:', ad.bottomImageId);
                                       // Replace broken image with placeholder
                                       e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="624" height="174"%3E%3Crect fill="%23f3f4f6" width="624" height="174"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="14" fill="%239ca3af"%3EImage Not Available%3C/text%3E%3C/svg%3E';
                                       e.currentTarget.style.border = '2px dashed #fbbf24';
@@ -279,9 +276,6 @@ export default function PendingAdsPage() {
                                     className="h-16 w-20 object-cover rounded cursor-pointer hover:scale-105 transition"
                                     onClick={() => window.open(getImageUrl(ad.id, 'fullscreen'), '_blank')}
                                     onError={(e) => {
-                                      const url = getImageUrl(ad.id, 'fullscreen');
-                                      console.error('Failed to load fullscreen image:', url);
-                                      console.error('Ad ID:', ad.id, 'GridFS ID:', ad.fullscreenImageId);
                                       // Replace broken image with placeholder
                                       e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="624" height="174"%3E%3Crect fill="%23f3f4f6" width="624" height="174"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="14" fill="%239ca3af"%3EImage Not Available%3C/text%3E%3C/svg%3E';
                                       e.currentTarget.style.border = '2px dashed #fbbf24';
