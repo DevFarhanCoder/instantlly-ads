@@ -113,7 +113,8 @@ export default function PendingAdsPage() {
   };
 
   const getImageUrl = (adId: string, type: 'bottom' | 'fullscreen') => {
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.instantllycards.com';
+    // Use staging server (same as mobile app)
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api-test.instantllycards.com';
     return `${baseUrl}/api/ads/image/${adId}/${type}`;
   };
 
@@ -252,28 +253,42 @@ export default function PendingAdsPage() {
                             <>
                               {/* Image ad (existing code) */}
                               {ad.bottomImageId && (
-                                <img
-                                  src={getImageUrl(ad.id, 'bottom')}
-                                  alt="Bottom"
-                                  className="h-16 w-20 object-cover rounded cursor-pointer hover:scale-105 transition"
-                                  onClick={() => window.open(getImageUrl(ad.id, 'bottom'), '_blank')}
-                                  onError={(e) => {
-                                    console.error('Failed to load bottom image:', getImageUrl(ad.id, 'bottom'));
-                                    e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%2250%22%3E%3Crect fill=%22%23f3f4f6%22 width=%22100%22 height=%2250%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23adb5bd%22 font-size=%2210%22%3EImage Error%3C/text%3E%3C/svg%3E';
-                                  }}
-                                />
+                                <div className="relative">
+                                  <img
+                                    src={getImageUrl(ad.id, 'bottom')}
+                                    alt="Bottom"
+                                    className="h-16 w-20 object-cover rounded cursor-pointer hover:scale-105 transition"
+                                    onClick={() => window.open(getImageUrl(ad.id, 'bottom'), '_blank')}
+                                    onError={(e) => {
+                                      const url = getImageUrl(ad.id, 'bottom');
+                                      console.error('Failed to load bottom image:', url);
+                                      console.error('Ad ID:', ad.id, 'GridFS ID:', ad.bottomImageId);
+                                      // Replace broken image with placeholder
+                                      e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="624" height="174"%3E%3Crect fill="%23f3f4f6" width="624" height="174"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="14" fill="%239ca3af"%3EImage Not Available%3C/text%3E%3C/svg%3E';
+                                      e.currentTarget.style.border = '2px dashed #fbbf24';
+                                      e.currentTarget.style.opacity = '0.7';
+                                    }}
+                                  />
+                                </div>
                               )}
                               {ad.fullscreenImageId && (
-                                <img
-                                  src={getImageUrl(ad.id, 'fullscreen')}
-                                  alt="Fullscreen"
-                                  className="h-16 w-20 object-cover rounded cursor-pointer hover:scale-105 transition"
-                                  onClick={() => window.open(getImageUrl(ad.id, 'fullscreen'), '_blank')}
-                                  onError={(e) => {
-                                    console.error('Failed to load fullscreen image:', getImageUrl(ad.id, 'fullscreen'));
-                                    e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%2250%22%3E%3Crect fill=%22%23f3f4f6%22 width=%22100%22 height=%2250%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23adb5bd%22 font-size=%2210%22%3EImage Error%3C/text%3E%3C/svg%3E';
-                                  }}
-                                />
+                                <div className="relative">
+                                  <img
+                                    src={getImageUrl(ad.id, 'fullscreen')}
+                                    alt="Fullscreen"
+                                    className="h-16 w-20 object-cover rounded cursor-pointer hover:scale-105 transition"
+                                    onClick={() => window.open(getImageUrl(ad.id, 'fullscreen'), '_blank')}
+                                    onError={(e) => {
+                                      const url = getImageUrl(ad.id, 'fullscreen');
+                                      console.error('Failed to load fullscreen image:', url);
+                                      console.error('Ad ID:', ad.id, 'GridFS ID:', ad.fullscreenImageId);
+                                      // Replace broken image with placeholder
+                                      e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="624" height="174"%3E%3Crect fill="%23f3f4f6" width="624" height="174"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="14" fill="%239ca3af"%3EImage Not Available%3C/text%3E%3C/svg%3E';
+                                      e.currentTarget.style.border = '2px dashed #fbbf24';
+                                      e.currentTarget.style.opacity = '0.7';
+                                    }}
+                                  />
+                                </div>
                               )}
                             </>
                           )}
