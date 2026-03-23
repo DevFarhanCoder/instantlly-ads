@@ -66,25 +66,25 @@ export default function Dashboard() {
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       console.log('🌐 [FRONTEND] Starting API request to fetch ads');
       console.log('🕐 Time:', new Date().toISOString());
-      console.log('🔗 URL:', api.defaults.baseURL + '/ads');
+      console.log('🔗 URL:', api.defaults.baseURL + '/admin/ads/all');
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
       const startTime = Date.now();
 
       try {
         console.log('📤 Sending GET request to backend...');
-        const response = await api.get('/ads');
+        const response = await api.get('/admin/ads/all');
         const requestTime = Date.now() - startTime;
 
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         console.log('✅ [FRONTEND] Response received!');
         console.log('⏱️  Request time:', requestTime, 'ms');
         console.log('📊 Status:', response.status);
-        console.log('📦 Data received:', response.data?.data?.length || 0, 'ads');
-        console.log('🐛 Debug info:', response.data?.debug);
+        console.log('📦 Data received:', response.data?.ads?.length || 0, 'ads');
+        console.log('🐛 Debug info:', response.data);
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-
-        return response.data.data;
+        
+        return response.data.ads || [];
       } catch (err: any) {
         const requestTime = Date.now() - startTime;
 
@@ -219,6 +219,14 @@ export default function Dashboard() {
 
     return true;
   }) || [];
+
+  console.log('📊 Dashboard State:', {
+    adsData: adsData?.length || 0,
+    filteredAds: filteredAds.length,
+    isLoading,
+    isError,
+    error: error?.message
+  });
 
   // Pagination
   const totalPages = Math.ceil(filteredAds.length / adsPerPage);
