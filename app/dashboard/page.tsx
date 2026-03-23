@@ -68,14 +68,14 @@ export default function Dashboard() {
       console.log('🕐 Time:', new Date().toISOString());
       console.log('🔗 URL:', api.defaults.baseURL + '/admin/ads/all');
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      
+
       const startTime = Date.now();
-      
+
       try {
         console.log('📤 Sending GET request to backend...');
         const response = await api.get('/admin/ads/all');
         const requestTime = Date.now() - startTime;
-        
+
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         console.log('✅ [FRONTEND] Response received!');
         console.log('⏱️  Request time:', requestTime, 'ms');
@@ -87,7 +87,7 @@ export default function Dashboard() {
         return response.data.ads || [];
       } catch (err: any) {
         const requestTime = Date.now() - startTime;
-        
+
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         console.error('❌ [FRONTEND] Request failed!');
         console.error('⏱️  Time elapsed:', requestTime, 'ms');
@@ -96,7 +96,7 @@ export default function Dashboard() {
         console.error('📊 Response status:', err.response?.status);
         console.error('📦 Response data:', err.response?.data);
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        
+
         throw err;
       }
     },
@@ -127,34 +127,34 @@ export default function Dashboard() {
 
   const handleEdit = async (ad: Ad) => {
     console.log('📝 [FRONTEND] Fetching complete ad data for editing:', ad._id);
-    
+
     try {
       // Fetch complete ad data
       const response = await api.get(`/ads/${ad._id}`);
       const completeAd = response.data.data;
-      
+
       console.log('✅ [FRONTEND] Complete ad data fetched');
       console.log('   bottomImage length:', completeAd.bottomImage?.length || 0);
       console.log('   fullscreenImage length:', completeAd.fullscreenImage?.length || 0);
       console.log('   bottomImageGridFS:', completeAd.bottomImageGridFS || 'none');
       console.log('   fullscreenImageGridFS:', completeAd.fullscreenImageGridFS || 'none');
-      
+
       // If images are in GridFS (empty bottomImage/fullscreenImage strings), 
       // use the image endpoint URLs instead
       if ((!completeAd.bottomImage || completeAd.bottomImage.length < 100) && completeAd.bottomImageGridFS) {
         console.log('🔄 [FRONTEND] Bottom image in GridFS - using endpoint URL');
         completeAd.bottomImage = getImageUrl(ad._id, 'bottom');
       }
-      
+
       if ((!completeAd.fullscreenImage || completeAd.fullscreenImage.length < 100) && completeAd.fullscreenImageGridFS) {
         console.log('🔄 [FRONTEND] Fullscreen image in GridFS - using endpoint URL');
         completeAd.fullscreenImage = getImageUrl(ad._id, 'fullscreen');
       }
-      
+
       console.log('✅ [FRONTEND] Images ready for edit form');
       console.log('   Has bottomImage:', !!completeAd.bottomImage);
       console.log('   Has fullscreenImage:', !!completeAd.fullscreenImage);
-      
+
       setEditingAd(completeAd);
       setShowModal(true);
     } catch (error) {
@@ -210,13 +210,13 @@ export default function Dashboard() {
       const matchesSearch = ad.title.toLowerCase().includes(query) || ad.phoneNumber.toLowerCase().includes(query);
       if (!matchesSearch) return false;
     }
-    
+
     // Status filter
     if (statusFilter === 'all') return true;
     if (statusFilter === 'active') return isAdActive(ad);
     if (statusFilter === 'expired') return isAdExpired(ad);
     if (statusFilter === 'scheduled') return isAdScheduled(ad);
-    
+
     return true;
   }) || [];
 
@@ -360,7 +360,7 @@ export default function Dashboard() {
                   <p className="text-sm text-red-700 mb-4">
                     {error instanceof Error ? error.message : 'Unknown error occurred'}
                   </p>
-                  
+
                   {/* Debug Information */}
                   <div className="bg-red-100 border border-red-300 rounded p-4 mb-4 text-left">
                     <p className="text-xs font-semibold text-red-900 mb-2">🐛 Debug Information:</p>
@@ -371,7 +371,7 @@ export default function Dashboard() {
                       <p>📱 Check browser console for detailed logs</p>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2 text-left text-xs text-red-600 bg-red-100 p-3 rounded mb-4">
                     <p><strong>Possible reasons:</strong></p>
                     <ul className="list-disc list-inside space-y-1">
@@ -395,172 +395,172 @@ export default function Dashboard() {
               </div>
             ) : adsData && adsData.length > 0 ? (
               filteredAds.length > 0 ? (
-              <table className="w-full min-w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sr.</th>
-                    <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Images</th>
-                    <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                    <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Phone</th>
-                    <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Schedule</th>
-                    <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {paginatedAds.map((ad: Ad, index: number) => {
-                    const status = getAdStatus(ad);
-                    const globalIndex = startIndex + index + 1;
-                    return (
-                      <tr key={ad._id} className="hover:bg-gray-50">
-                        <td className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm font-medium text-gray-900">{globalIndex}</td>
-                        <td className="px-2 sm:px-4 lg:px-6 py-4">
-                          <div className="flex flex-col space-y-2">
-                            {/* Check if it's a video ad */}
-                            {ad.adType === 'video' ? (
-                              <>
-                                {ad.hasBottomVideo && (
-                                  <div>
-                                    <p className="text-xs font-medium text-gray-500 mb-1">Bottom Video</p>
-                                    <div 
-                                      className="relative w-44 h-12 bg-gradient-to-br from-blue-100 to-purple-100 rounded overflow-hidden cursor-pointer group border border-gray-200"
-                                      onClick={() => setVideoModal({ 
-                                        show: true, 
-                                        url: `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/channel-partner/ads/video/${ad.bottomVideoId}`,
-                                        title: `${ad.title} - Bottom Video`
-                                      })}
-                                    >
-                                      <video 
-                                        src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/channel-partner/ads/video/${ad.bottomVideoId}#t=0.5`}
-                                        className="h-full w-full object-cover pointer-events-none"
-                                        preload="metadata"
-                                        muted
-                                        playsInline
-                                        onLoadedData={(e) => {
-                                          const video = e.target as HTMLVideoElement;
-                                          video.currentTime = 0.5;
-                                        }}
-                                      />
-                                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent flex items-center justify-center group-hover:from-black/70 group-hover:via-black/40 transition-all">
-                                        <div className="bg-white/90 rounded-full p-1.5 group-hover:bg-white group-hover:scale-110 transition-all">
-                                          <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
-                                          </svg>
+                <table className="w-full min-w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sr.</th>
+                      <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Images</th>
+                      <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                      <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Phone</th>
+                      <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Schedule</th>
+                      <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {paginatedAds.map((ad: Ad, index: number) => {
+                      const status = getAdStatus(ad);
+                      const globalIndex = startIndex + index + 1;
+                      return (
+                        <tr key={ad._id} className="hover:bg-gray-50">
+                          <td className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm font-medium text-gray-900">{globalIndex}</td>
+                          <td className="px-2 sm:px-4 lg:px-6 py-4">
+                            <div className="flex flex-col space-y-2">
+                              {/* Check if it's a video ad */}
+                              {ad.adType === 'video' ? (
+                                <>
+                                  {ad.hasBottomVideo && (
+                                    <div>
+                                      <p className="text-xs font-medium text-gray-500 mb-1">Bottom Video</p>
+                                      <div
+                                        className="relative w-44 h-12 bg-gradient-to-br from-blue-100 to-purple-100 rounded overflow-hidden cursor-pointer group border border-gray-200"
+                                        onClick={() => setVideoModal({
+                                          show: true,
+                                          url: `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/channel-partner/ads/video/${ad.bottomVideoId}`,
+                                          title: `${ad.title} - Bottom Video`
+                                        })}
+                                      >
+                                        <video
+                                          src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/channel-partner/ads/video/${ad.bottomVideoId}#t=0.5`}
+                                          className="h-full w-full object-cover pointer-events-none"
+                                          preload="metadata"
+                                          muted
+                                          playsInline
+                                          onLoadedData={(e) => {
+                                            const video = e.target as HTMLVideoElement;
+                                            video.currentTime = 0.5;
+                                          }}
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent flex items-center justify-center group-hover:from-black/70 group-hover:via-black/40 transition-all">
+                                          <div className="bg-white/90 rounded-full p-1.5 group-hover:bg-white group-hover:scale-110 transition-all">
+                                            <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                              <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                                            </svg>
+                                          </div>
                                         </div>
                                       </div>
                                     </div>
-                                  </div>
-                                )}
-                                {ad.hasFullscreenVideo && (
-                                  <div>
-                                    <p className="text-xs font-medium text-gray-500 mb-1">Full Video</p>
-                                    <div 
-                                      className="relative w-12 h-16 bg-gradient-to-br from-purple-100 to-pink-100 rounded overflow-hidden cursor-pointer group border border-gray-200"
-                                      onClick={() => setVideoModal({ 
-                                        show: true, 
-                                        url: `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/channel-partner/ads/video/${ad.fullscreenVideoId}`,
-                                        title: `${ad.title} - Full Video`
-                                      })}
-                                    >
-                                      <video 
-                                        src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/channel-partner/ads/video/${ad.fullscreenVideoId}#t=0.5`}
-                                        className="h-full w-full object-cover pointer-events-none"
-                                        preload="metadata"
-                                        muted
-                                        playsInline
-                                        onLoadedData={(e) => {
-                                          const video = e.target as HTMLVideoElement;
-                                          video.currentTime = 0.5;
-                                        }}
-                                      />
-                                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent flex items-center justify-center group-hover:from-black/70 group-hover:via-black/40 transition-all">
-                                        <div className="bg-white/90 rounded-full p-1.5 group-hover:bg-white group-hover:scale-110 transition-all">
-                                          <svg className="w-4 h-4 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
-                                          </svg>
+                                  )}
+                                  {ad.hasFullscreenVideo && (
+                                    <div>
+                                      <p className="text-xs font-medium text-gray-500 mb-1">Full Video</p>
+                                      <div
+                                        className="relative w-12 h-16 bg-gradient-to-br from-purple-100 to-pink-100 rounded overflow-hidden cursor-pointer group border border-gray-200"
+                                        onClick={() => setVideoModal({
+                                          show: true,
+                                          url: `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/channel-partner/ads/video/${ad.fullscreenVideoId}`,
+                                          title: `${ad.title} - Full Video`
+                                        })}
+                                      >
+                                        <video
+                                          src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/channel-partner/ads/video/${ad.fullscreenVideoId}#t=0.5`}
+                                          className="h-full w-full object-cover pointer-events-none"
+                                          preload="metadata"
+                                          muted
+                                          playsInline
+                                          onLoadedData={(e) => {
+                                            const video = e.target as HTMLVideoElement;
+                                            video.currentTime = 0.5;
+                                          }}
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent flex items-center justify-center group-hover:from-black/70 group-hover:via-black/40 transition-all">
+                                          <div className="bg-white/90 rounded-full p-1.5 group-hover:bg-white group-hover:scale-110 transition-all">
+                                            <svg className="w-4 h-4 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                                              <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                                            </svg>
+                                          </div>
                                         </div>
                                       </div>
                                     </div>
-                                  </div>
-                                )}
-                              </>
-                            ) : (
-                              <>
-                                <div>
-                                  <p className="text-xs font-medium text-gray-500 mb-1">Bottom</p>
-                                  <img
-                                    src={getImageUrl(ad._id, 'bottom')}
-                                    alt={`${ad.title} - Bottom`}
-                                    className="h-10 sm:h-12 w-auto object-cover rounded border"
-                                  />
-                                </div>
-                                {(ad.fullscreenImage || ad.fullscreenImageGridFS) && (
+                                  )}
+                                </>
+                              ) : (
+                                <>
                                   <div>
-                                    <p className="text-xs font-medium text-gray-500 mb-1">Full</p>
+                                    <p className="text-xs font-medium text-gray-500 mb-1">Bottom</p>
                                     <img
-                                      src={getImageUrl(ad._id, 'fullscreen')}
-                                      alt={`${ad.title} - Fullscreen`}
+                                      src={getImageUrl(ad._id, 'bottom')}
+                                      alt={`${ad.title} - Bottom`}
                                       className="h-10 sm:h-12 w-auto object-cover rounded border"
                                     />
                                   </div>
-                                )}
-                              </>
+                                  {(ad.fullscreenImage || ad.fullscreenImageGridFS) && (
+                                    <div>
+                                      <p className="text-xs font-medium text-gray-500 mb-1">Full</p>
+                                      <img
+                                        src={getImageUrl(ad._id, 'fullscreen')}
+                                        alt={`${ad.title} - Fullscreen`}
+                                        className="h-10 sm:h-12 w-auto object-cover rounded border"
+                                      />
+                                    </div>
+                                  )}
+                                </>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-2 sm:px-4 lg:px-6 py-4">
+                            <div className="text-xs sm:text-sm font-medium text-gray-900">{ad.title}</div>
+                            {ad.adType === 'video' ? (
+                              <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 mt-1">
+                                Video Ad
+                              </span>
+                            ) : (ad.fullscreenImage || ad.fullscreenImageGridFS) ? (
+                              <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 mt-1">
+                                With Fullscreen
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 mt-1">
+                                Banner Only
+                              </span>
                             )}
-                          </div>
-                        </td>
-                        <td className="px-2 sm:px-4 lg:px-6 py-4">
-                          <div className="text-xs sm:text-sm font-medium text-gray-900">{ad.title}</div>
-                          {ad.adType === 'video' ? (
-                            <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 mt-1">
-                              Video Ad
-                            </span>
-                          ) : (ad.fullscreenImage || ad.fullscreenImageGridFS) ? (
-                            <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 mt-1">
-                              With Fullscreen
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 mt-1">
-                              Banner Only
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 hidden md:table-cell">{ad.phoneNumber}</td>
-                        <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap hidden lg:table-cell">
-                          <div className="flex flex-col space-y-1 text-xs text-gray-500">
-                            <span>📅 {format(new Date(ad.startDate), 'MMM dd, yyyy')}</span>
-                            <span>📅 {format(new Date(ad.endDate), 'MMM dd, yyyy')}</span>
-                          </div>
-                        </td>
-                        <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap">
-                          <span
-                            className={`px-2 sm:px-3 py-1 rounded-full text-xs font-semibold ${status.color}`}
-                          >
-                            {status.label}
-                          </span>
-                        </td>
-                        <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <div className="flex space-x-1 sm:space-x-2">
-                            <button
-                              onClick={() => handleEdit(ad)}
-                              className="text-blue-600 hover:text-blue-900 p-1.5 sm:p-2 hover:bg-blue-50 rounded"
-                              title="Edit ad"
+                          </td>
+                          <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 hidden md:table-cell">{ad.phoneNumber}</td>
+                          <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap hidden lg:table-cell">
+                            <div className="flex flex-col space-y-1 text-xs text-gray-500">
+                              <span>📅 {format(new Date(ad.startDate), 'MMM dd, yyyy')}</span>
+                              <span>📅 {format(new Date(ad.endDate), 'MMM dd, yyyy')}</span>
+                            </div>
+                          </td>
+                          <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap">
+                            <span
+                              className={`px-2 sm:px-3 py-1 rounded-full text-xs font-semibold ${status.color}`}
                             >
-                              <Edit size={16} className="sm:w-[18px] sm:h-[18px]" />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(ad._id)}
-                              className="text-red-600 hover:text-red-900 p-1.5 sm:p-2 hover:bg-red-50 rounded"
-                              title="Delete ad"
-                            >
-                              <Trash2 size={16} className="sm:w-[18px] sm:h-[18px]" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                              {status.label}
+                            </span>
+                          </td>
+                          <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div className="flex space-x-1 sm:space-x-2">
+                              <button
+                                onClick={() => handleEdit(ad)}
+                                className="text-blue-600 hover:text-blue-900 p-1.5 sm:p-2 hover:bg-blue-50 rounded"
+                                title="Edit ad"
+                              >
+                                <Edit size={16} className="sm:w-[18px] sm:h-[18px]" />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(ad._id)}
+                                className="text-red-600 hover:text-red-900 p-1.5 sm:p-2 hover:bg-red-50 rounded"
+                                title="Delete ad"
+                              >
+                                <Trash2 size={16} className="sm:w-[18px] sm:h-[18px]" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               ) : (
                 <div className="p-8 text-center text-gray-500">
                   No ads match your search. Try a different search term.
@@ -572,7 +572,7 @@ export default function Dashboard() {
               </div>
             )}
           </div>
-          
+
           {/* Pagination Controls */}
           {filteredAds.length > 0 && totalPages > 1 && (
             <div className="p-4 border-t flex items-center justify-between">
@@ -587,7 +587,7 @@ export default function Dashboard() {
                 >
                   Previous
                 </button>
-                
+
                 {/* Page numbers */}
                 <div className="flex items-center gap-1">
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => {
@@ -601,11 +601,10 @@ export default function Dashboard() {
                         <button
                           key={page}
                           onClick={() => setCurrentPage(page)}
-                          className={`px-3 py-1 rounded-lg text-sm font-medium ${
-                            currentPage === page
-                              ? 'bg-blue-600 text-white'
-                              : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
-                          }`}
+                          className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === page
+                            ? 'bg-blue-600 text-white'
+                            : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                            }`}
                         >
                           {page}
                         </button>
@@ -619,7 +618,7 @@ export default function Dashboard() {
                     return null;
                   })}
                 </div>
-                
+
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                   disabled={currentPage === totalPages}
@@ -654,23 +653,40 @@ function AdModal({ ad, onClose }: { ad: Ad | null; onClose: () => void }) {
   const [isUploading, setIsUploading] = useState(false);
   const [formData, setFormData] = useState({
     title: ad?.title || '',
-    mediaType: 'image' as 'image' | 'video',
+    // mediaType: 'image' as 'image' | 'video',
     bottomImage: ad?.bottomImage || '',
     fullscreenImage: ad?.fullscreenImage || '',
     phoneNumber: ad?.phoneNumber || '',
     startDate: ad ? format(new Date(ad.startDate), 'yyyy-MM-dd') : '',
     endDate: ad ? format(new Date(ad.endDate), 'yyyy-MM-dd') : '',
     priority: ad?.priority || 5,
+    bottomMediaType: 'image' as 'image' | 'video',
+    fullscreenMediaType: 'image' as 'image' | 'video',
+    bottomFile: null as File | null,
+    fullscreenFile: null as File | null,
   });
+  const [bottomPreview, setBottomPreview] = useState<string | null>(null);
+  const [fullscreenPreview, setFullscreenPreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (ad) {
+      setFormData(prev => ({
+        ...prev,
+        bottomMediaType: ad.adType === 'video' ? 'video' : 'image',
+        fullscreenMediaType: ad.adType === 'video' ? 'video' : 'image',
+      }));
+    }
+  }, [ad]);
+
 
   const saveMutation = useMutation({
     mutationFn: async (data: any) => {
       setIsUploading(true);
       setUploadProgress(0);
-      
+
       try {
         if (ad) {
-          await api.put(`/ads/${ad._id}`, data, {
+          await api.put(`/ads/${ad._id}`, buildFormData(), {
             onUploadProgress: (progressEvent) => {
               const percentCompleted = progressEvent.total
                 ? Math.round((progressEvent.loaded * 100) / progressEvent.total)
@@ -679,7 +695,7 @@ function AdModal({ ad, onClose }: { ad: Ad | null; onClose: () => void }) {
             },
           });
         } else {
-          await api.post('/ads', data, {
+          await api.post('/ads', buildFormData(), {
             onUploadProgress: (progressEvent) => {
               const percentCompleted = progressEvent.total
                 ? Math.round((progressEvent.loaded * 100) / progressEvent.total)
@@ -708,22 +724,16 @@ function AdModal({ ad, onClose }: { ad: Ad | null; onClose: () => void }) {
   const handleBottomImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData({ ...formData, bottomImage: reader.result as string });
-      };
-      reader.readAsDataURL(file);
+      setFormData(p => ({ ...p, bottomFile: file }));
+      setBottomPreview(URL.createObjectURL(file))
     }
   };
 
   const handleFullscreenImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData({ ...formData, fullscreenImage: reader.result as string });
-      };
-      reader.readAsDataURL(file);
+      setFormData(p => ({ ...p, fullscreenFile: file }));
+      setFullscreenPreview(URL.createObjectURL(file))
     }
   };
 
@@ -732,231 +742,273 @@ function AdModal({ ad, onClose }: { ad: Ad | null; onClose: () => void }) {
     saveMutation.mutate(formData);
   };
 
+  const buildFormData = () => {
+    const fd = new FormData();
+
+    fd.append('title', formData.title);
+    fd.append('phoneNumber', formData.phoneNumber);
+    fd.append('startDate', formData.startDate);
+    fd.append('endDate', formData.endDate);
+    fd.append('priority', String(formData.priority));
+
+    fd.append('bottomMediaType', formData.bottomMediaType);
+    fd.append('fullscreenMediaType', formData.fullscreenMediaType);
+
+    if (formData.bottomFile) {
+      fd.append(
+        formData.bottomMediaType === 'image' ? 'bottomImage' : 'bottomVideo',
+        formData.bottomFile
+      );
+    }
+
+    if (formData.fullscreenFile) {
+      fd.append(
+        formData.fullscreenMediaType === 'image'
+          ? 'fullscreenImage'
+          : 'fullscreenVideo',
+        formData.fullscreenFile
+      );
+    }
+
+    return fd;
+  };
+
+
   return (
     <>
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6 border-b flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-            <span className="text-2xl">⊕</span>
-            {ad ? 'Edit Advertisement' : 'Create New Advertisement'}
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-xl font-bold"
-          >
-            ✕ Cancel
-          </button>
-        </div>
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              📝 Advertisement Title <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              placeholder="e.g., Summer Sale 2024"
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-700 text-gray-900"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              🖼️ Media Type <span className="text-red-500">*</span>
-            </label>
-            <div className="flex w-full rounded-lg overflow-hidden">
-              <button
-                type="button"
-                className={`flex-1 px-4 py-3 font-semibold transition flex items-center justify-center gap-2 ${
-                  formData.mediaType === 'image'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
-                }`}
-                onClick={() => {
-                  setFormData({ ...formData, mediaType: 'image', bottomImage: '', fullscreenImage: '' });
-                }}
-              >
-                🖼️ Image
-              </button>
-              <button
-                type="button"
-                className={`flex-1 px-4 py-3 font-semibold transition flex items-center justify-center gap-2 ${
-                  formData.mediaType === 'video'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 border-l-0'
-                }`}
-                onClick={() => {
-                  setFormData({ ...formData, mediaType: 'video', bottomImage: '', fullscreenImage: '' });
-                }}
-              >
-                🎬 Video
-              </button>
-            </div>
-            <p className="text-xs text-gray-500 mt-2">
-              Select whether your advertisement is an image or video
-            </p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              📞 Contact Phone Number <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="tel"
-              value={formData.phoneNumber}
-              onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-              placeholder="+919876543210"
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-700 text-gray-900"
-              required
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Users will see Call/Message buttons with this number
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                📅 Start Date <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="date"
-                value={formData.startDate}
-                onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
-                style={{ colorScheme: 'light' }}
-                required
-              />
-              <p className="text-xs text-gray-500 mt-1">Your ad will start on this date</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                📅 End Date <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="date"
-                value={formData.endDate}
-                onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
-                style={{ colorScheme: 'light' }}
-                required
-              />
-              <p className="text-xs text-gray-500 mt-1">Your ad will end on this date</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                🖼️ Bottom Banner {formData.mediaType === 'image' ? 'Image' : 'Video'} <span className="text-red-500">* (624 × 174px)</span>
-              </label>
-              <input
-                type="file"
-                accept={formData.mediaType === 'image' ? 'image/*' : 'video/*'}
-                onChange={handleBottomImageUpload}
-                className="block w-full text-sm text-gray-500
-                  file:mr-4 file:py-2.5 file:px-4
-                  file:rounded-lg file:border-0
-                  file:text-sm file:font-semibold
-                  file:bg-blue-600 file:text-white
-                  hover:file:bg-blue-700 file:cursor-pointer
-                  border border-gray-300 rounded-lg
-                  cursor-pointer focus:outline-none"
-                required={!ad}
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                This appears in the bottom carousel • {formData.mediaType === 'image' ? 'Image' : 'Video'} only
-              </p>
-              {formData.bottomImage && (
-                <div className="mt-2">
-                  {formData.mediaType === 'image' ? (
-                    <img src={formData.bottomImage} alt="Bottom Preview" className="h-20 rounded border shadow-sm object-cover" />
-                  ) : (
-                    <video src={formData.bottomImage} controls className="h-20 rounded border shadow-sm" />
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                🖼️ Fullscreen {formData.mediaType === 'image' ? 'Image' : 'Video'} (Optional) (624 × 1000px)
-              </label>
-              <input
-                type="file"
-                accept={formData.mediaType === 'image' ? 'image/*' : 'video/*'}
-                onChange={handleFullscreenImageUpload}
-                className="block w-full text-sm text-gray-500
-                  file:mr-4 file:py-2.5 file:px-4
-                  file:rounded-lg file:border-0
-                  file:text-sm file:font-semibold
-                  file:bg-blue-600 file:text-white
-                  hover:file:bg-blue-700 file:cursor-pointer
-                  border border-gray-300 rounded-lg
-                  cursor-pointer focus:outline-none"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Shown when user taps the banner • {formData.mediaType === 'image' ? 'Image' : 'Video'} only
-              </p>
-              {formData.fullscreenImage && (
-                <div className="mt-2">
-                  {formData.mediaType === 'image' ? (
-                    <img src={formData.fullscreenImage} alt="Fullscreen Preview" className="h-32 rounded border shadow-sm object-cover" />
-                  ) : (
-                    <video src={formData.fullscreenImage} controls className="h-32 rounded border shadow-sm" />
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="flex justify-end space-x-3 pt-6 mt-6 border-t">
+          <div className="p-6 border-b flex items-center justify-between">
+            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <span className="text-2xl">⊕</span>
+              {ad ? 'Edit Advertisement' : 'Create New Advertisement'}
+            </h2>
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition font-medium"
-              disabled={isUploading}
+              className="text-gray-400 hover:text-gray-600 text-xl font-bold"
             >
-              Cancel
+              ✕ Cancel
             </button>
-            <div className="flex-1 max-w-xs">
-              {isUploading && (
-                <div className="mb-2">
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-xs font-medium text-blue-600">Uploading...</span>
-                    <span className="text-xs font-medium text-blue-600">{uploadProgress}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                    <div
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out"
-                      style={{ width: `${uploadProgress}%` }}
-                    ></div>
-                  </div>
-                </div>
-              )}
-              <button
-                type="submit"
-                disabled={saveMutation.isPending || isUploading}
-                className="w-full px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 font-semibold flex items-center justify-center gap-2"
-              >
-                {isUploading 
-                  ? `Uploading ${uploadProgress}%` 
-                  : saveMutation.isPending 
-                    ? 'Saving...' 
-                    : ad 
-                      ? '⚡ Update Advertisement' 
-                      : '⚡ Submit Advertisement'
-                }
-              </button>
-            </div>
           </div>
-        </form>
+          <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                📝 Advertisement Title <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                placeholder="e.g., Summer Sale 2024"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-700 text-gray-900"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                🖼️ Media Type <span className="text-red-500">*</span>
+              </label>
+              <div className="flex w-full rounded-lg overflow-hidden">
+                <button
+                  type="button"
+                  className={`flex-1 px-4 py-3 font-semibold transition flex items-center justify-center gap-2 ${formData.bottomMediaType === 'image'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+                    }`}
+                  onClick={() => {
+                    setFormData(prev => ({
+                      ...prev,
+                      bottomMediaType: 'image',
+                      fullscreenMediaType: 'image',
+                      bottomFile: null,
+                      fullscreenFile: null,
+                    }))
+                  }}
+                >
+                  🖼️ Image
+                </button>
+                <button
+                  type="button"
+                  className={`flex-1 px-4 py-3 font-semibold transition flex items-center justify-center gap-2 ${formData.bottomMediaType === 'video'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 border-l-0'
+                    }`}
+                  onClick={() => {
+                    setFormData(prev => ({
+                      ...prev,
+                      bottomMediaType: 'video',
+                      fullscreenMediaType: 'video',
+                      bottomFile: null,
+                      fullscreenFile: null,
+                    }))
+                  }}
+                >
+                  🎬 Video
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Select whether your advertisement is an image or video
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                📞 Contact Phone Number <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="tel"
+                value={formData.phoneNumber}
+                onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                placeholder="+919876543210"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-700 text-gray-900"
+                required
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Users will see Call/Message buttons with this number
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  📅 Start Date <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  value={formData.startDate}
+                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                  style={{ colorScheme: 'light' }}
+                  required
+                />
+                <p className="text-xs text-gray-500 mt-1">Your ad will start on this date</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  📅 End Date <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  value={formData.endDate}
+                  onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                  style={{ colorScheme: 'light' }}
+                  required
+                />
+                <p className="text-xs text-gray-500 mt-1">Your ad will end on this date</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  🖼️ Bottom Banner {formData.bottomMediaType === 'image' ? 'Image' : 'Video'} <span className="text-red-500">* (624 × 174px)</span>
+                </label>
+                <input
+                  type="file"
+                  accept={formData.bottomMediaType === 'image' ? 'image/*' : 'video/*'}
+                  onChange={handleBottomImageUpload}
+                  className="block w-full text-sm text-gray-500
+                  file:mr-4 file:py-2.5 file:px-4
+                  file:rounded-lg file:border-0
+                  file:text-sm file:font-semibold
+                  file:bg-blue-600 file:text-white
+                  hover:file:bg-blue-700 file:cursor-pointer
+                  border border-gray-300 rounded-lg
+                  cursor-pointer focus:outline-none"
+                  required={!ad}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  This appears in the bottom carousel • {formData.bottomMediaType === 'image' ? 'Image' : 'Video'} only
+                </p>
+                {bottomPreview && (
+                  <div className="mt-2">
+                    {formData.bottomMediaType === 'image' ? (
+                      <img src={bottomPreview} alt="Bottom Preview" className="h-20 rounded border shadow-sm object-cover" />
+                    ) : (
+                      <video src={bottomPreview} controls className="h-20 rounded border shadow-sm" />
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  🖼️ Fullscreen {formData.fullscreenMediaType === 'image' ? 'Image' : 'Video'} (Optional) (624 × 1000px)
+                </label>
+                <input
+                  type="file"
+                  accept={formData.fullscreenMediaType === 'image' ? 'image/*' : 'video/*'}
+                  onChange={handleFullscreenImageUpload}
+                  className="block w-full text-sm text-gray-500
+                  file:mr-4 file:py-2.5 file:px-4
+                  file:rounded-lg file:border-0
+                  file:text-sm file:font-semibold
+                  file:bg-blue-600 file:text-white
+                  hover:file:bg-blue-700 file:cursor-pointer
+                  border border-gray-300 rounded-lg
+                  cursor-pointer focus:outline-none"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Shown when user taps the banner • {formData.fullscreenMediaType === 'image' ? 'Image' : 'Video'} only
+                </p>
+                {fullscreenPreview && (
+                  <div className="mt-2">
+                    {formData.fullscreenMediaType === 'image' ? (
+                      <img src={fullscreenPreview} alt="Fullscreen Preview" className="h-32 rounded border shadow-sm object-cover" />
+                    ) : (
+                      <video src={fullscreenPreview} controls className="h-32 rounded border shadow-sm" />
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-3 pt-6 mt-6 border-t">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition font-medium"
+                disabled={isUploading}
+              >
+                Cancel
+              </button>
+              <div className="flex-1 max-w-xs">
+                {isUploading && (
+                  <div className="mb-2">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-xs font-medium text-blue-600">Uploading...</span>
+                      <span className="text-xs font-medium text-blue-600">{uploadProgress}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                      <div
+                        className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out"
+                        style={{ width: `${uploadProgress}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
+                <button
+                  type="submit"
+                  disabled={saveMutation.isPending || isUploading}
+                  className="w-full px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 font-semibold flex items-center justify-center gap-2"
+                >
+                  {isUploading
+                    ? `Uploading ${uploadProgress}%`
+                    : saveMutation.isPending
+                      ? 'Saving...'
+                      : ad
+                        ? '⚡ Update Advertisement'
+                        : '⚡ Submit Advertisement'
+                  }
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
     </>
   );
 }
@@ -987,20 +1039,20 @@ function ImageCropModal({
     img.onload = () => {
       imageRef.current = img;
       setImageLoaded(true);
-      
+
       // Calculate initial crop box based on aspect ratio
       const aspectRatio = targetWidth / targetHeight;
       const containerWidth = 600; // Max container width
       const containerHeight = 400; // Max container height
-      
+
       let boxWidth = Math.min(containerWidth * 0.7, 400);
       let boxHeight = boxWidth / aspectRatio;
-      
+
       if (boxHeight > containerHeight * 0.7) {
         boxHeight = containerHeight * 0.7;
         boxWidth = boxHeight * aspectRatio;
       }
-      
+
       setCropArea({
         x: (containerWidth - boxWidth) / 2,
         y: (containerHeight - boxHeight) / 2,
@@ -1014,10 +1066,10 @@ function ImageCropModal({
   const handleMouseDown = (e: React.MouseEvent) => {
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
-    
+
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    
+
     // Check if click is inside crop box
     if (
       x >= cropArea.x &&
@@ -1032,14 +1084,14 @@ function ImageCropModal({
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging || !containerRef.current) return;
-    
+
     const rect = containerRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    
+
     const newX = Math.max(0, Math.min(x - dragStart.x, rect.width - cropArea.width));
     const newY = Math.max(0, Math.min(y - dragStart.y, rect.height - cropArea.height));
-    
+
     setCropArea({ ...cropArea, x: newX, y: newY });
   };
 
@@ -1049,7 +1101,7 @@ function ImageCropModal({
 
   const handleCrop = () => {
     if (!imageRef.current || !containerRef.current) return;
-    
+
     const canvas = document.createElement('canvas');
     canvas.width = targetWidth;
     canvas.height = targetHeight;
@@ -1058,7 +1110,7 @@ function ImageCropModal({
 
     const container = containerRef.current;
     const img = imageRef.current;
-    
+
     // Calculate the scale between displayed image and actual image
     const displayedWidth = container.offsetWidth;
     const displayedHeight = container.offsetHeight;
@@ -1116,7 +1168,7 @@ function ImageCropModal({
                   className="max-w-full max-h-[400px] block"
                   draggable={false}
                 />
-                
+
                 {/* Overlay (darkened area outside crop box) */}
                 <div className="absolute inset-0 pointer-events-none">
                   {/* Top overlay */}
@@ -1165,7 +1217,7 @@ function ImageCropModal({
                   <div className="absolute -top-1 -right-1 w-4 h-4 bg-white border-2 border-blue-500 rounded-full" />
                   <div className="absolute -bottom-1 -left-1 w-4 h-4 bg-white border-2 border-blue-500 rounded-full" />
                   <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-white border-2 border-blue-500 rounded-full" />
-                  
+
                   {/* Grid lines */}
                   <div className="absolute left-1/3 top-0 bottom-0 w-px bg-white opacity-50" />
                   <div className="absolute left-2/3 top-0 bottom-0 w-px bg-white opacity-50" />
